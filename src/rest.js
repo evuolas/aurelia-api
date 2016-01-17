@@ -2,9 +2,12 @@ import {HttpClient, json} from 'aurelia-fetch-client';
 import {inject} from 'aurelia-framework';
 import qs from 'querystring';
 import extend from 'extend';
+import {objectKeysToSnakeCase, objectKeysToCamelCase} from './utils';
 
 @inject(HttpClient)
 export class Rest {
+  convertRequestKeysToSnakeCase = true;
+  convertResponseKeysToCamelCase = true;
 
   /**
    * Inject the httpClient to use for requests.
@@ -38,12 +41,25 @@ export class Rest {
     }
 
     if (typeof body === 'object') {
+      if (this.convertRequestKeysToSnakeCase) {
+        body = objectKeysToSnakeCase(body);
+      }
+
       requestOptions.body = json(body);
     }
 
     return this.client.fetch(path, requestOptions).then(response => {
       if (response.status >= 200 && response.status < 400) {
-        return response.json().catch(error => null);
+
+        let result = response.json().catch(error => null);
+
+        if (this.convertResponseKeysToCamelCase) {
+          return result.then(res => {
+            return objectKeysToCamelCase(res);
+          });
+        }
+
+        return result;
       }
 
       throw response;

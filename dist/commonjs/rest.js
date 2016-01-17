@@ -22,9 +22,14 @@ var _extend = require('extend');
 
 var _extend2 = _interopRequireDefault(_extend);
 
+var _utils = require('./utils');
+
 var Rest = (function () {
   function Rest(httpClient) {
     _classCallCheck(this, _Rest);
+
+    this.convertRequestKeysToSnakeCase = true;
+    this.convertResponseKeysToCamelCase = true;
 
     this.client = httpClient;
   }
@@ -32,6 +37,8 @@ var Rest = (function () {
   _createClass(Rest, [{
     key: 'request',
     value: function request(method, path, body, options) {
+      var _this = this;
+
       var requestOptions = (0, _extend2['default'])(true, {
         method: method,
         headers: {
@@ -45,14 +52,27 @@ var Rest = (function () {
       }
 
       if (typeof body === 'object') {
+        if (this.convertRequestKeysToSnakeCase) {
+          body = (0, _utils.objectKeysToSnakeCase)(body);
+        }
+
         requestOptions.body = (0, _aureliaFetchClient.json)(body);
       }
 
       return this.client.fetch(path, requestOptions).then(function (response) {
         if (response.status >= 200 && response.status < 400) {
-          return response.json()['catch'](function (error) {
+
+          var result = response.json()['catch'](function (error) {
             return null;
           });
+
+          if (_this.convertResponseKeysToCamelCase) {
+            return result.then(function (res) {
+              return (0, _utils.objectKeysToCamelCase)(res);
+            });
+          }
+
+          return result;
         }
 
         throw response;

@@ -1,7 +1,7 @@
-System.register(['aurelia-fetch-client', 'aurelia-framework', 'querystring', 'extend'], function (_export) {
+System.register(['aurelia-fetch-client', 'aurelia-framework', 'querystring', 'extend', './utils'], function (_export) {
   'use strict';
 
-  var HttpClient, json, inject, qs, extend, Rest;
+  var HttpClient, json, inject, qs, extend, objectKeysToSnakeCase, objectKeysToCamelCase, Rest;
 
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
@@ -17,11 +17,17 @@ System.register(['aurelia-fetch-client', 'aurelia-framework', 'querystring', 'ex
       qs = _querystring['default'];
     }, function (_extend) {
       extend = _extend['default'];
+    }, function (_utils) {
+      objectKeysToSnakeCase = _utils.objectKeysToSnakeCase;
+      objectKeysToCamelCase = _utils.objectKeysToCamelCase;
     }],
     execute: function () {
       Rest = (function () {
         function Rest(httpClient) {
           _classCallCheck(this, _Rest);
+
+          this.convertRequestKeysToSnakeCase = true;
+          this.convertResponseKeysToCamelCase = true;
 
           this.client = httpClient;
         }
@@ -29,6 +35,8 @@ System.register(['aurelia-fetch-client', 'aurelia-framework', 'querystring', 'ex
         _createClass(Rest, [{
           key: 'request',
           value: function request(method, path, body, options) {
+            var _this = this;
+
             var requestOptions = extend(true, {
               method: method,
               headers: {
@@ -42,14 +50,27 @@ System.register(['aurelia-fetch-client', 'aurelia-framework', 'querystring', 'ex
             }
 
             if (typeof body === 'object') {
+              if (this.convertRequestKeysToSnakeCase) {
+                body = objectKeysToSnakeCase(body);
+              }
+
               requestOptions.body = json(body);
             }
 
             return this.client.fetch(path, requestOptions).then(function (response) {
               if (response.status >= 200 && response.status < 400) {
-                return response.json()['catch'](function (error) {
+
+                var result = response.json()['catch'](function (error) {
                   return null;
                 });
+
+                if (_this.convertResponseKeysToCamelCase) {
+                  return result.then(function (res) {
+                    return objectKeysToCamelCase(res);
+                  });
+                }
+
+                return result;
               }
 
               throw response;

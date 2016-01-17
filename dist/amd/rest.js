@@ -1,4 +1,4 @@
-define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', 'extend'], function (exports, _aureliaFetchClient, _aureliaFramework, _querystring, _extend) {
+define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', 'extend', './utils'], function (exports, _aureliaFetchClient, _aureliaFramework, _querystring, _extend, _utils) {
   'use strict';
 
   Object.defineProperty(exports, '__esModule', {
@@ -19,12 +19,17 @@ define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', '
     function Rest(httpClient) {
       _classCallCheck(this, _Rest);
 
+      this.convertRequestKeysToSnakeCase = true;
+      this.convertResponseKeysToCamelCase = true;
+
       this.client = httpClient;
     }
 
     _createClass(Rest, [{
       key: 'request',
       value: function request(method, path, body, options) {
+        var _this = this;
+
         var requestOptions = (0, _extend2['default'])(true, {
           method: method,
           headers: {
@@ -38,14 +43,27 @@ define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', '
         }
 
         if (typeof body === 'object') {
+          if (this.convertRequestKeysToSnakeCase) {
+            body = (0, _utils.objectKeysToSnakeCase)(body);
+          }
+
           requestOptions.body = (0, _aureliaFetchClient.json)(body);
         }
 
         return this.client.fetch(path, requestOptions).then(function (response) {
           if (response.status >= 200 && response.status < 400) {
-            return response.json()['catch'](function (error) {
+
+            var result = response.json()['catch'](function (error) {
               return null;
             });
+
+            if (_this.convertResponseKeysToCamelCase) {
+              return result.then(function (res) {
+                return (0, _utils.objectKeysToCamelCase)(res);
+              });
+            }
+
+            return result;
           }
 
           throw response;
