@@ -1,12 +1,9 @@
 import {json} from 'aurelia-fetch-client';
 import qs from 'querystring';
 import extend from 'extend';
-import {objectKeysToSnakeCase, objectKeysToCamelCase} from './utils';
 
 export class Rest {
   interceptor;
-  convertRequestKeysToSnakeCase = true;
-  convertResponseKeysToCamelCase = true;
 
   /**
    * Inject the httpClient to use for requests.

@@ -1,4 +1,4 @@
-define(['exports', 'aurelia-fetch-client', 'querystring', 'extend', './utils'], function (exports, _aureliaFetchClient, _querystring, _extend, _utils) {
+define(['exports', 'aurelia-fetch-client', 'querystring', 'extend'], function (exports, _aureliaFetchClient, _querystring, _extend) {
   'use strict';
 
   Object.defineProperty(exports, '__esModule', {
@@ -18,9 +18,6 @@ define(['exports', 'aurelia-fetch-client', 'querystring', 'extend', './utils'], 
   var Rest = (function () {
     function Rest(httpClient) {
       _classCallCheck(this, Rest);
-
-      this.convertRequestKeysToSnakeCase = true;
-      this.convertResponseKeysToCamelCase = true;
 
       this.client = httpClient;
     }

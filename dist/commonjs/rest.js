@@ -20,14 +20,9 @@ var _extend = require('extend');
 
 var _extend2 = _interopRequireDefault(_extend);
 
-var _utils = require('./utils');
-
 var Rest = (function () {
   function Rest(httpClient) {
     _classCallCheck(this, Rest);
-
-    this.convertRequestKeysToSnakeCase = true;
-    this.convertResponseKeysToCamelCase = true;
 
     this.client = httpClient;
   }

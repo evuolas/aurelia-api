@@ -2,8 +2,8 @@ import {HttpClient} from 'aurelia-fetch-client';
 import {Rest} from './rest';
 
 export class Config {
-  endpoints       = {};
-  defaultEndpoint = null;
+  endpoints        = {};
+  defaultEndpoint  = null;
 
   /**
    * Register a new endpoint.

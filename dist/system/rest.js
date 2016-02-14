@@ -1,7 +1,7 @@
-System.register(['aurelia-fetch-client', 'querystring', 'extend', './utils'], function (_export) {
+System.register(['aurelia-fetch-client', 'querystring', 'extend'], function (_export) {
   'use strict';
 
-  var json, qs, extend, objectKeysToSnakeCase, objectKeysToCamelCase, Rest;
+  var json, qs, extend, Rest;
 
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
@@ -14,17 +14,11 @@ System.register(['aurelia-fetch-client', 'querystring', 'extend', './utils'], fu
       qs = _querystring['default'];
     }, function (_extend) {
       extend = _extend['default'];
-    }, function (_utils) {
-      objectKeysToSnakeCase = _utils.objectKeysToSnakeCase;
-      objectKeysToCamelCase = _utils.objectKeysToCamelCase;
     }],
     execute: function () {
       Rest = (function () {
         function Rest(httpClient) {
           _classCallCheck(this, Rest);
-
-          this.convertRequestKeysToSnakeCase = true;
-          this.convertResponseKeysToCamelCase = true;
 
           this.client = httpClient;
         }
