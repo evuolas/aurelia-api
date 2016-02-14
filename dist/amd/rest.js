@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', 'extend', './utils'], function (exports, _aureliaFetchClient, _aureliaFramework, _querystring, _extend, _utils) {
+=======
+define(['exports', 'aurelia-fetch-client', 'querystring', 'extend'], function (exports, _aureliaFetchClient, _querystring, _extend) {
+>>>>>>> SpoonX/master
   'use strict';
 
   Object.defineProperty(exports, '__esModule', {
@@ -17,7 +21,7 @@ define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', '
 
   var Rest = (function () {
     function Rest(httpClient) {
-      _classCallCheck(this, _Rest);
+      _classCallCheck(this, Rest);
 
       this.convertRequestKeysToSnakeCase = true;
       this.convertResponseKeysToCamelCase = true;
@@ -91,7 +95,7 @@ define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', '
         var requestPath = resource;
 
         if (criteria) {
-          requestPath += '/' + criteria;
+          requestPath += typeof criteria !== 'object' ? '/' + criteria : '?' + _qs['default'].stringify(criteria);
         }
 
         return this.request('put', requestPath, body, options);
@@ -102,7 +106,7 @@ define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', '
         var requestPath = resource;
 
         if (criteria) {
-          requestPath += '/' + criteria;
+          requestPath += typeof criteria !== 'object' ? '/' + criteria : '?' + _qs['default'].stringify(criteria);
         }
 
         return this.request('delete', requestPath, undefined, options);
@@ -114,8 +118,6 @@ define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', '
       }
     }]);
 
-    var _Rest = Rest;
-    Rest = (0, _aureliaFramework.inject)(_aureliaFetchClient.HttpClient)(Rest) || Rest;
     return Rest;
   })();
 

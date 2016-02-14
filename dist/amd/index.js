@@ -1,4 +1,4 @@
-define(['exports', 'aurelia-fetch-client', './rest'], function (exports, _aureliaFetchClient, _rest) {
+define(['exports', './config', './rest', './endpoint'], function (exports, _config, _rest, _endpoint) {
   'use strict';
 
   Object.defineProperty(exports, '__esModule', {
@@ -11,8 +11,22 @@ define(['exports', 'aurelia-fetch-client', './rest'], function (exports, _aureli
       return _rest.Rest;
     }
   });
+  Object.defineProperty(exports, 'Config', {
+    enumerable: true,
+    get: function get() {
+      return _config.Config;
+    }
+  });
+  Object.defineProperty(exports, 'Endpoint', {
+    enumerable: true,
+    get: function get() {
+      return _endpoint.Endpoint;
+    }
+  });
 
   function configure(aurelia, configCallback) {
-    aurelia.container.get(_aureliaFetchClient.HttpClient).configure(configCallback);
+    var config = aurelia.container.get(_config.Config);
+
+    configCallback(config);
   }
 });

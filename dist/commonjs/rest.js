@@ -12,8 +12,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var _aureliaFetchClient = require('aurelia-fetch-client');
 
-var _aureliaFramework = require('aurelia-framework');
-
 var _querystring = require('querystring');
 
 var _querystring2 = _interopRequireDefault(_querystring);
@@ -26,7 +24,7 @@ var _utils = require('./utils');
 
 var Rest = (function () {
   function Rest(httpClient) {
-    _classCallCheck(this, _Rest);
+    _classCallCheck(this, Rest);
 
     this.convertRequestKeysToSnakeCase = true;
     this.convertResponseKeysToCamelCase = true;
@@ -100,7 +98,7 @@ var Rest = (function () {
       var requestPath = resource;
 
       if (criteria) {
-        requestPath += '/' + criteria;
+        requestPath += typeof criteria !== 'object' ? '/' + criteria : '?' + _querystring2['default'].stringify(criteria);
       }
 
       return this.request('put', requestPath, body, options);
@@ -111,7 +109,7 @@ var Rest = (function () {
       var requestPath = resource;
 
       if (criteria) {
-        requestPath += '/' + criteria;
+        requestPath += typeof criteria !== 'object' ? '/' + criteria : '?' + _querystring2['default'].stringify(criteria);
       }
 
       return this.request('delete', requestPath, undefined, options);
@@ -123,8 +121,6 @@ var Rest = (function () {
     }
   }]);
 
-  var _Rest = Rest;
-  Rest = (0, _aureliaFramework.inject)(_aureliaFetchClient.HttpClient)(Rest) || Rest;
   return Rest;
 })();
 
