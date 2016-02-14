@@ -1,16 +1,16 @@
-import {HttpClient, json} from 'aurelia-fetch-client';
-import {inject} from 'aurelia-framework';
+import {json} from 'aurelia-fetch-client';
 import qs from 'querystring';
 import extend from 'extend';
 import {objectKeysToSnakeCase, objectKeysToCamelCase} from './utils';
 
-@inject(HttpClient)
 export class Rest {
+  interceptor;
   convertRequestKeysToSnakeCase = true;
   convertResponseKeysToCamelCase = true;
 
   /**
    * Inject the httpClient to use for requests.
+   *
    * @param {HttpClient} httpClient
    */
   constructor(httpClient) {
@@ -33,19 +33,22 @@ export class Rest {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-      }
+      },
+      body: body
     }, options || {});
 
     if (typeof options !== 'undefined') {
       extend(true, requestOptions, options);
     }
 
-    if (typeof body === 'object') {
-      if (this.convertRequestKeysToSnakeCase) {
-        body = objectKeysToSnakeCase(body);
-      }
+    let interceptor = this.interceptor;
 
-      requestOptions.body = json(body);
+    if (interceptor && typeof interceptor.request === 'function') {
+      requestOptions = interceptor.request(requestOptions);
+    }
+
+    if (typeof body === 'object') {
+      requestOptions.body = json(requestOptions.body);
     }
 
     return this.client.fetch(path, requestOptions).then(response => {
@@ -53,9 +56,9 @@ export class Rest {
 
         let result = response.json().catch(error => null);
 
-        if (this.convertResponseKeysToCamelCase) {
+        if (interceptor && typeof interceptor.response === 'function') {
           return result.then(res => {
-            return objectKeysToCamelCase(res);
+            return interceptor.response(res);
           });
         }
 
@@ -112,7 +115,7 @@ export class Rest {
     let requestPath = resource;
 
     if (criteria) {
-      requestPath += `/${criteria}`;
+      requestPath += typeof criteria !== 'object' ? `/${criteria}` : '?' + qs.stringify(criteria);
     }
 
     return this.request('put', requestPath, body, options);
@@ -131,7 +134,7 @@ export class Rest {
     let requestPath = resource;
 
     if (criteria) {
-      requestPath += `/${criteria}`;
+      requestPath += typeof criteria !== 'object' ? `/${criteria}` : '?' + qs.stringify(criteria);
     }
 
     return this.request('delete', requestPath, undefined, options);

@@ -1,3 +1,52 @@
+<a name"2.0.6"></a>
+### 2.0.6 (2016-02-09)
+
+
+<a name"2.0.5"></a>
+### 2.0.5 (2016-02-04)
+
+
+<a name"2.0.4"></a>
+### 2.0.4 (2016-02-01)
+
+
+#### Features
+
+* **rest:** allow criteria as object for update and destroy ([2738f8ca](https://github.com/SpoonX/aurelia-api/commit/2738f8ca))
+
+
+### 2.0.3 (2016-01-24)
+
+
+### 2.0.2 (2016-01-17)
+
+
+#### Bug Fixes
+
+* **config:** Be more permissive when looking for the default endpoint ([5b0d0f53](https://github.com/SpoonX/aurelia-api/commit/5b0d0f53261fc2c6958d06a8a994ca1a2a470e58))
+
+
+### 2.0.1 (2016-01-15)
+
+
+#### Features
+
+* **project:**
+  * Added travis ([33707db4](https://github.com/SpoonX/aurelia-api/commit/33707db45c285ed9073514a7ab655b73eee7322d))
+  * Added snyk ([421e14e8](https://github.com/SpoonX/aurelia-api/commit/421e14e8db9141b86d48965fc7e9a9b3ddf401f0))
+* **test:** Added tests for plugin ([08beea51](https://github.com/SpoonX/aurelia-api/commit/08beea51a8ea6ddbcfb496a0a75693928b1c8f07))
+
+
+## 2.0.0 (2016-01-15)
+
+
+#### Features
+
+* **config:** Added plugin configuration class ([d225ecc6](https://github.com/SpoonX/aurelia-api/commit/d225ecc6fd8543932941230db7875644339ec5c0))
+* **endpoint:** Added an Endpoint resolver ([65419d45](https://github.com/SpoonX/aurelia-api/commit/65419d45181017654cac57bbf03aeaa59d74a56e))
+* **plugin:** Expose Config and Resolver ([90d3de04](https://github.com/SpoonX/aurelia-api/commit/90d3de04ce4b0a4ee7a21c80dc906e0dc2cecaec))
+
+
 ### 1.2.2 (2016-01-02)
 
 

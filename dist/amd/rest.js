@@ -1,4 +1,4 @@
-define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', 'extend', './utils'], function (exports, _aureliaFetchClient, _aureliaFramework, _querystring, _extend, _utils) {
+define(['exports', 'aurelia-fetch-client', 'querystring', 'extend', './utils'], function (exports, _aureliaFetchClient, _querystring, _extend, _utils) {
   'use strict';
 
   Object.defineProperty(exports, '__esModule', {
@@ -17,7 +17,7 @@ define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', '
 
   var Rest = (function () {
     function Rest(httpClient) {
-      _classCallCheck(this, _Rest);
+      _classCallCheck(this, Rest);
 
       this.convertRequestKeysToSnakeCase = true;
       this.convertResponseKeysToCamelCase = true;
@@ -28,26 +28,27 @@ define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', '
     _createClass(Rest, [{
       key: 'request',
       value: function request(method, path, body, options) {
-        var _this = this;
-
         var requestOptions = (0, _extend2['default'])(true, {
           method: method,
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
-          }
+          },
+          body: body
         }, options || {});
 
         if (typeof options !== 'undefined') {
           (0, _extend2['default'])(true, requestOptions, options);
         }
 
-        if (typeof body === 'object') {
-          if (this.convertRequestKeysToSnakeCase) {
-            body = (0, _utils.objectKeysToSnakeCase)(body);
-          }
+        var interceptor = this.interceptor;
 
-          requestOptions.body = (0, _aureliaFetchClient.json)(body);
+        if (interceptor && typeof interceptor.request === 'function') {
+          requestOptions = interceptor.request(requestOptions);
+        }
+
+        if (typeof body === 'object') {
+          requestOptions.body = (0, _aureliaFetchClient.json)(requestOptions.body);
         }
 
         return this.client.fetch(path, requestOptions).then(function (response) {
@@ -57,9 +58,9 @@ define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', '
               return null;
             });
 
-            if (_this.convertResponseKeysToCamelCase) {
+            if (interceptor && typeof interceptor.response === 'function') {
               return result.then(function (res) {
-                return (0, _utils.objectKeysToCamelCase)(res);
+                return interceptor.response(res);
               });
             }
 
@@ -91,7 +92,7 @@ define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', '
         var requestPath = resource;
 
         if (criteria) {
-          requestPath += '/' + criteria;
+          requestPath += typeof criteria !== 'object' ? '/' + criteria : '?' + _qs['default'].stringify(criteria);
         }
 
         return this.request('put', requestPath, body, options);
@@ -102,7 +103,7 @@ define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', '
         var requestPath = resource;
 
         if (criteria) {
-          requestPath += '/' + criteria;
+          requestPath += typeof criteria !== 'object' ? '/' + criteria : '?' + _qs['default'].stringify(criteria);
         }
 
         return this.request('delete', requestPath, undefined, options);
@@ -114,8 +115,6 @@ define(['exports', 'aurelia-fetch-client', 'aurelia-framework', 'querystring', '
       }
     }]);
 
-    var _Rest = Rest;
-    Rest = (0, _aureliaFramework.inject)(_aureliaFetchClient.HttpClient)(Rest) || Rest;
     return Rest;
   })();
 

@@ -12,8 +12,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var _aureliaFetchClient = require('aurelia-fetch-client');
 
-var _aureliaFramework = require('aurelia-framework');
-
 var _querystring = require('querystring');
 
 var _querystring2 = _interopRequireDefault(_querystring);
@@ -26,7 +24,7 @@ var _utils = require('./utils');
 
 var Rest = (function () {
   function Rest(httpClient) {
-    _classCallCheck(this, _Rest);
+    _classCallCheck(this, Rest);
 
     this.convertRequestKeysToSnakeCase = true;
     this.convertResponseKeysToCamelCase = true;
@@ -37,26 +35,27 @@ var Rest = (function () {
   _createClass(Rest, [{
     key: 'request',
     value: function request(method, path, body, options) {
-      var _this = this;
-
       var requestOptions = (0, _extend2['default'])(true, {
         method: method,
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
-        }
+        },
+        body: body
       }, options || {});
 
       if (typeof options !== 'undefined') {
         (0, _extend2['default'])(true, requestOptions, options);
       }
 
-      if (typeof body === 'object') {
-        if (this.convertRequestKeysToSnakeCase) {
-          body = (0, _utils.objectKeysToSnakeCase)(body);
-        }
+      var interceptor = this.interceptor;
 
-        requestOptions.body = (0, _aureliaFetchClient.json)(body);
+      if (interceptor && typeof interceptor.request === 'function') {
+        requestOptions = interceptor.request(requestOptions);
+      }
+
+      if (typeof body === 'object') {
+        requestOptions.body = (0, _aureliaFetchClient.json)(requestOptions.body);
       }
 
       return this.client.fetch(path, requestOptions).then(function (response) {
@@ -66,9 +65,9 @@ var Rest = (function () {
             return null;
           });
 
-          if (_this.convertResponseKeysToCamelCase) {
+          if (interceptor && typeof interceptor.response === 'function') {
             return result.then(function (res) {
-              return (0, _utils.objectKeysToCamelCase)(res);
+              return interceptor.response(res);
             });
           }
 
@@ -100,7 +99,7 @@ var Rest = (function () {
       var requestPath = resource;
 
       if (criteria) {
-        requestPath += '/' + criteria;
+        requestPath += typeof criteria !== 'object' ? '/' + criteria : '?' + _querystring2['default'].stringify(criteria);
       }
 
       return this.request('put', requestPath, body, options);
@@ -111,7 +110,7 @@ var Rest = (function () {
       var requestPath = resource;
 
       if (criteria) {
-        requestPath += '/' + criteria;
+        requestPath += typeof criteria !== 'object' ? '/' + criteria : '?' + _querystring2['default'].stringify(criteria);
       }
 
       return this.request('delete', requestPath, undefined, options);
@@ -123,8 +122,6 @@ var Rest = (function () {
     }
   }]);
 
-  var _Rest = Rest;
-  Rest = (0, _aureliaFramework.inject)(_aureliaFetchClient.HttpClient)(Rest) || Rest;
   return Rest;
 })();
 
