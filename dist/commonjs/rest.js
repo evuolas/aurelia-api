@@ -35,26 +35,27 @@ var Rest = (function () {
   _createClass(Rest, [{
     key: 'request',
     value: function request(method, path, body, options) {
-      var _this = this;
-
       var requestOptions = (0, _extend2['default'])(true, {
         method: method,
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
-        }
+        },
+        body: body
       }, options || {});
 
       if (typeof options !== 'undefined') {
         (0, _extend2['default'])(true, requestOptions, options);
       }
 
-      if (typeof body === 'object') {
-        if (this.convertRequestKeysToSnakeCase) {
-          body = (0, _utils.objectKeysToSnakeCase)(body);
-        }
+      var interceptor = this.interceptor;
 
-        requestOptions.body = (0, _aureliaFetchClient.json)(body);
+      if (interceptor && typeof interceptor.request === 'function') {
+        requestOptions = interceptor.request(requestOptions);
+      }
+
+      if (typeof body === 'object') {
+        requestOptions.body = (0, _aureliaFetchClient.json)(requestOptions.body);
       }
 
       return this.client.fetch(path, requestOptions).then(function (response) {
@@ -64,9 +65,9 @@ var Rest = (function () {
             return null;
           });
 
-          if (_this.convertResponseKeysToCamelCase) {
+          if (interceptor && typeof interceptor.response === 'function') {
             return result.then(function (res) {
-              return (0, _utils.objectKeysToCamelCase)(res);
+              return interceptor.response(res);
             });
           }
 

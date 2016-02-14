@@ -82,4 +82,22 @@ export class Config {
 
     return this;
   }
+
+  /**
+   * Register interceptor for previously registered endpoint.
+   *
+   * @param {string} name
+   * @param {object} interceptor
+   *
+   * @return {Config}
+   */
+  registerInterceptor(name, interceptor) {
+    let endpoint = this.getEndpoint(name);
+
+    if (endpoint) {
+      endpoint.interceptor = interceptor;
+    }
+
+    return this;
+  }
 }

@@ -4,6 +4,7 @@ import extend from 'extend';
 import {objectKeysToSnakeCase, objectKeysToCamelCase} from './utils';
 
 export class Rest {
+  interceptor;
   convertRequestKeysToSnakeCase = true;
   convertResponseKeysToCamelCase = true;
 
@@ -32,19 +33,22 @@ export class Rest {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-      }
+      },
+      body: body
     }, options || {});
 
     if (typeof options !== 'undefined') {
       extend(true, requestOptions, options);
     }
 
-    if (typeof body === 'object') {
-      if (this.convertRequestKeysToSnakeCase) {
-        body = objectKeysToSnakeCase(body);
-      }
+    let interceptor = this.interceptor;
 
-      requestOptions.body = json(body);
+    if (interceptor && typeof interceptor.request === 'function') {
+      requestOptions = interceptor.request(requestOptions);
+    }
+
+    if (typeof body === 'object') {
+      requestOptions.body = json(requestOptions.body);
     }
 
     return this.client.fetch(path, requestOptions).then(response => {
@@ -52,9 +56,9 @@ export class Rest {
 
         let result = response.json().catch(error => null);
 
-        if (this.convertResponseKeysToCamelCase) {
+        if (interceptor && typeof interceptor.response === 'function') {
           return result.then(res => {
-            return objectKeysToCamelCase(res);
+            return interceptor.response(res);
           });
         }
 

@@ -64,6 +64,17 @@ define(['exports', 'aurelia-fetch-client', './rest'], function (exports, _aureli
 
         return this;
       }
+    }, {
+      key: 'registerInterceptor',
+      value: function registerInterceptor(name, interceptor) {
+        var endpoint = this.getEndpoint(name);
+
+        if (endpoint) {
+          endpoint.interceptor = interceptor;
+        }
+
+        return this;
+      }
     }]);
 
     return Config;

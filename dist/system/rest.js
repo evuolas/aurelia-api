@@ -1,14 +1,7 @@
-<<<<<<< HEAD
-System.register(['aurelia-fetch-client', 'aurelia-framework', 'querystring', 'extend', './utils'], function (_export) {
+System.register(['aurelia-fetch-client', 'querystring', 'extend', './utils'], function (_export) {
   'use strict';
 
-  var HttpClient, json, inject, qs, extend, objectKeysToSnakeCase, objectKeysToCamelCase, Rest;
-=======
-System.register(['aurelia-fetch-client', 'querystring', 'extend'], function (_export) {
-  'use strict';
-
-  var json, qs, extend, Rest;
->>>>>>> SpoonX/master
+  var json, qs, extend, objectKeysToSnakeCase, objectKeysToCamelCase, Rest;
 
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
@@ -39,26 +32,27 @@ System.register(['aurelia-fetch-client', 'querystring', 'extend'], function (_ex
         _createClass(Rest, [{
           key: 'request',
           value: function request(method, path, body, options) {
-            var _this = this;
-
             var requestOptions = extend(true, {
               method: method,
               headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
-              }
+              },
+              body: body
             }, options || {});
 
             if (typeof options !== 'undefined') {
               extend(true, requestOptions, options);
             }
 
-            if (typeof body === 'object') {
-              if (this.convertRequestKeysToSnakeCase) {
-                body = objectKeysToSnakeCase(body);
-              }
+            var interceptor = this.interceptor;
 
-              requestOptions.body = json(body);
+            if (interceptor && typeof interceptor.request === 'function') {
+              requestOptions = interceptor.request(requestOptions);
+            }
+
+            if (typeof body === 'object') {
+              requestOptions.body = json(requestOptions.body);
             }
 
             return this.client.fetch(path, requestOptions).then(function (response) {
@@ -68,9 +62,9 @@ System.register(['aurelia-fetch-client', 'querystring', 'extend'], function (_ex
                   return null;
                 });
 
-                if (_this.convertResponseKeysToCamelCase) {
+                if (interceptor && typeof interceptor.response === 'function') {
                   return result.then(function (res) {
-                    return objectKeysToCamelCase(res);
+                    return interceptor.response(res);
                   });
                 }
 
