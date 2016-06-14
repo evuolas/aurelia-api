@@ -2,93 +2,90 @@
 
 [![Build Status](https://travis-ci.org/SpoonX/aurelia-api.svg?branch=master)](https://travis-ci.org/SpoonX/aurelia-api)
 [![Known Vulnerabilities](https://snyk.io/test/npm/name/badge.svg)](https://snyk.io/test/npm/aurelia-api)
-[![Join the chat at https://gitter.im/aurelia/discuss](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/SpoonX/Dev?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg?maxAge=2592000?style=plastic)](https://gitter.im/SpoonX/Dev)
 
-This library is a plugin for the [Aurelia](http://www.aurelia.io/) platform and contains support for multiple endpoints, extending the functionalities supplied by [aurelia-fetch-client](https://github.com/aurelia/fetch-client).
-This library plays nice with the [Sails.js framework](http://sailsjs.org).
+> This library is a plugin for the [Aurelia](http://www.aurelia.io/) platform and contains support for multiple endpoints, extending the functionalities supplied by [aurelia-fetch-client](https://github.com/aurelia/fetch-client).
+> This library plays nice with the [Sails.js framework](http://sailsjs.org).
 
-> To keep up to date on [Aurelia](http://www.aurelia.io/), please visit and subscribe to [the official blog](http://blog.durandal.io/). If you have questions, we invite you to [join us on Gitter](https://gitter.im/aurelia/discuss). If you would like to have deeper insight into our development process, please install the [ZenHub](https://zenhub.io) Chrome Extension and visit any of our repository's boards. You can get an overview of all Aurelia work by visiting [the framework board](https://github.com/aurelia/framework#boards).
+Talking to your api shouldn't be difficult. You shouldn't have to repeat yourself. You shouldn't need nuclear power plants to make it easier. You should just be able to say "give me that thing!" and be done with it. If only we could do something about that...
+
+You guessed it! We have something for that. Aurelia-api comes with a set of cool features that makes talking to APIs easy and fun.
+
+Aurelia-api is a module wrapped around aurelia-fetch-client that allows you to:
+
+* Perform the usual CRUD
+* Supply criteria for your api
+* Manage more than one endpoint
+* Add defaults
+* Add interceptors
+* And more
+
+## Important note
+
+We've simplified installation and usage! This plugin should now be installed using `jspm i aurelia-api` or (for webpack) `npm i aurelia-api --save`. Make sure you update all references to `spoonx/aurelia-api` and remove the `spoonx/` prefix (don't forget your config.js, package.json, imports and bundles).
+
+## Documentation
+
+You can find usage examples and the documentation at [aurelia-api-doc](http://aurelia-api.spoonx.org/).
+
+The [changelog](doc/changelog.md) provides you with information about important changes.
 
 ## Installation
 
-Installing this module is fairly simple.
-
-Run `jspm install github:spoonx/aurelia-api` from your project root.
+Run `jspm i aurelia-api`, or (for webpack) `npm i aurelia-api` from your project root.
 
 ## Usage
 
-### Configuring the client
+### Configuring
 
-This module allows you to register and configure multiple clients.
-You can then pass these clients to other libs when needed.
+Register the plugin and some endpoints.
 
-Make sure your project uses a `main.js` file to initialize aurelia.
-In your configure function, you might do something like this:
-
-```javascript
+```js
 aurelia.use
   /* Your other plugins and init code */
-  .plugin('spoonx/aurelia-api', config => {
-  
-    // Current host
-    config.registerEndpoint('api');
+  .plugin('aurelia-api', config => {
 
-    // Different host
-    config.registerEndpoint('api', 'https://myapi.org/');
-
-    // With defaults
-    config.registerEndpoint('api', 'https://myapi.org/', {headers: {x:'foo'}});
-
-    // Own configuration
-    // @see http://aurelia.io/docs.html#/aurelia/fetch-client/latest/doc/api/class/HttpClientConfiguration
-    config.registerEndpoint('api', configure => {
-      configure.withBaseUrl('https://myapi.org/');
-    });
-  });
+    // Register hosts
+    config.registerEndpoint('api', '/mypath');
+    config.registerEndpoint('other-api', '/otherpath', {headers: {'Content-Type': 'x-www-form-urlencoded'}});
+  })
 ```
 
-### Rest client
+### Get and use an endpoint
 
-To use the Rest client, use the Endpoint resolver to inject it.
+You can get endpoints with the `.getEndpoint()` method on the `Config` instance from aurelia-api.
 
-Here's an example:
-
-```javascript
+```js
 import {inject} from 'aurelia-framework';
-import {Endpoint} from 'spoonx/aurelia-api';
-
-@inject(Endpoint.of('api'), Endpoint.of('auth'))
-export class MyClass {
-  constructor(apiEndpoint, authEndpoint) {
-    this.apiEndpoint  = apiEndpoint;
-    this.authEndpoint = authEndpoint;
-  }
-  
-  attached() {
-    this.apiEndpoint.find('product', {
-      category: 5,
-      name    : {contains: 'mouse'}
-    })
-    .then(console.log)
-    .catch(console.error);
-  }
-}
-```
-
-Alternatively, you could also request your endpoint at the config. Example:
-
-```javascript
-import {inject} from 'aurelia-framework';
-import {Config} from 'spoonx/aurelia-api';
+import {Config} from 'aurelia-api';
 
 @inject(Config)
 export class MyClass {
   constructor(config) {
     this.apiEndpoint = config.getEndpoint('api');
+
+    this.apiEndpoint.find('users')
+    .then(users => {
+        // use your received users.json
+    })
+    .catch(console.error);
   }
 }
 ```
 
-## API
+## Quick Rest api overview
 
-You can find more documentation, including a **getting-started guide**, in the [doc/](doc/) directory.
+All methods will, when the body is passed as an object, stringify the body if the `Content-Type` is set to `application/json` or convert the body to querystring format for all other set `Content-Type`s.
+
+````js
+endpoint
+  .client                                     // the httpClient instance
+  .endpoint                                   // name of the endpoint
+  .find(resource, criteria, options)          // GET
+  .post(resource, body, options) {            // POST
+  .update(resource, criteria, body, options)  // PUT
+  .patch(resource, criteria, body, options)   // PATCH
+  .destroy(resource, criteria, options)       // DELETE
+  .create(resource, body, options)            // POST
+  .request(method, path, body, options)       // method
+```

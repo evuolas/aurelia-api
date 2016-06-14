@@ -1,6 +1,9 @@
 import {resolver} from 'aurelia-dependency-injection';
 import {Config} from './config';
 
+/**
+ * Endpoint class. A resolver for endpoints which allows injection of the corresponding Rest client into a class
+ */
 @resolver()
 export class Endpoint {
 
@@ -18,7 +21,7 @@ export class Endpoint {
    *
    * @param {Container} container
    *
-   * @return {*}
+   * @return {Rest}
    */
   get(container) {
     return container.get(Config).getEndpoint(this._key);
@@ -27,9 +30,9 @@ export class Endpoint {
   /**
    * Get a new resolver for `key`.
    *
-   * @param {string} key
+   * @param {string} key  The endpoint name
    *
-   * @return {Endpoint}
+   * @return {Endpoint}  Resolves to the Rest client for this endpoint
    */
   static of(key) {
     return new Endpoint(key);

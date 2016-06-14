@@ -16,7 +16,7 @@ Now it's time to start doing something
 
 ### Installation and configuration
 
-First, head on over to your favorite terminal and run `jspm install github:spoonx/aurelia-api` from your project root.
+First, head on over to your favorite terminal and run `jspm install aurelia-api` from your project root.
 This will install the module of which you're reading the getting-started right now. Woah!
 
 ### Reflect
@@ -44,7 +44,7 @@ export function configure(aurelia) {
     .developmentLogging()
 
     // Add this:
-    .plugin('spoonx/aurelia-api', config => {
+    .plugin('aurelia-api', config => {
       config.registerEndpoint('github', 'https://api.github.com/');
     });
 
@@ -53,15 +53,15 @@ export function configure(aurelia) {
 ```
 
 Aaaawesome. That wasn't really complicated, right?
-All we did, was tell aurelia to use the `spoonx/aurelia-api` plugin and register an endpoint. Now, let's use it!
+All we did, was tell aurelia to use the `aurelia-api` plugin and register an endpoint. Now, let's use it!
 
 ### Using the plugin
 
 Now head back to `src/users.js`. Change the file to look like this:
 
-```javascript
+```js
 import {inject} from 'aurelia-framework';
-import {Endpoint} from 'spoonx/aurelia-api';
+import {Endpoint} from 'aurelia-api';
 import 'fetch';
 
 @inject(Endpoint.of('github'))
@@ -86,7 +86,7 @@ Here's what we've changed. We've:
 2. Altered the `@inject()` decorator to use the `Endpoint` resolver.
 3. Completely removed the config calls in the constructor. (We added that in `src/main.js` earlier).
 4. Assigned the endpoint to the viewModel.
-5. Changed `this.http.fetch('users')` to `this.githubEndpoint.find('users')`. Notice that we removed the `.json()` step, too.
+5. Changed `this.http.fetch('users')` to `this.githubEndpoint.find('users')`. Notice that we removed the `.json()` step, too. Our Rest api methods already do that for you.
 
 And done! We've now successfully swapped auth `aurelia-fetch-client` with `aurelia-api`.
 
@@ -95,6 +95,36 @@ Head back to your terminal, run `gulp watch` and open the project in your browse
 ## What's next?
 
 There are some additional things you can do with the plugin.
+
+### The Rest client
+
+You probably don't only want to retrieve data but send some also. The Rest client of an endpoint has all the methods and options you might desire. Here is just a quick overview. All methods will, when the body passed as an object, stringify it if the `Content-Type` is `application/json` (the default), resp. convert it to querystring format if the `Content-Type` is `application/x-www-form-urlencoded`. All methods return a Promise with the server response parsed to an object if possible.
+
+````js
+endpoint
+  .find(resource, criteria, options)          // GET
+  .post(resource, body, options)              // POST
+  .update(resource, criteria, body, options)  // PUT
+  .patch(resource, criteria, body, options)   // PATCH
+  .destroy(resource, criteria, options)       // DELETE
+  .create(resource, body, options)            // POST
+  .request(method, path, body, options)       // method
+```
+
+The [Rest api](api_rest.md) has more information about those. Here is just another quick example:
+
+```js
+import {Rest} from 'aurelia-api';
+
+@inject(Rest)
+export class MyViewModel {
+  constructor (restClient) {
+    restClient.update('product', 17, {price: 4000})
+      .then(console.log)
+      .catch(console.error);
+  }
+}
+```
 
 ### Multiple endpoints
 
@@ -108,7 +138,7 @@ export function configure(aurelia) {
     .standardConfiguration()
     .developmentLogging()
 
-    .plugin('spoonx/aurelia-api', config => {
+    .plugin('aurelia-api', config => {
       config
         .registerEndpoint('github', 'https://api.github.com/')
         .registerEndpoint('auth', 'https://auth.example.io/')
@@ -134,7 +164,7 @@ export function configure(aurelia) {
     .standardConfiguration()
     .developmentLogging()
 
-    .plugin('spoonx/aurelia-api', config => {
+    .plugin('aurelia-api', config => {
       config
         .registerEndpoint('github', 'https://api.github.com/')
         .registerEndpoint('auth', 'https://auth.example.io/')
@@ -148,9 +178,9 @@ export function configure(aurelia) {
 
 And when using it:
 
-```javascript
+```js
 import {inject} from 'aurelia-framework';
-import {Endpoint} from 'spoonx/aurelia-api';
+import {Endpoint} from 'aurelia-api';
 import 'fetch';
 
 @inject(Endpoint.of(), Endpoint.of('github'))

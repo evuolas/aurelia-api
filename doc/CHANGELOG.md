@@ -1,7 +1,111 @@
+<a name"3.0.0-rc4"></a>
+### 3.0.0-rc4 (2016-06-09)
+
+
+#### Bug Fixes
+
+* **rest:** check for ['Content-Type'] and ['content-type'] ([8c87af2e](https://github.com/SpoonX/aurelia-api/commit/8c87af2e))
+
+
+#### Features
+
+* **project:** replace defaults, auto-convert objects for x-ww-form-urlencoded and json. allow  ([c68faffc](https://github.com/SpoonX/aurelia-api/commit/c68faffc))
+
+
+#### Breaking Changes
+
+* registerEndpoint - defaults will now completely replace standard deafults. Needed  to submit multipart/form-data.
+
+ ([c68faffc](https://github.com/SpoonX/aurelia-api/commit/c68faffc))
+
+
+<a name"3.0.0-rc3"></a>
+### 3.0.0-rc3 (2016-06-02)
+
+
+#### Features
+
+* **project:** replace defaults, auto-convert objects for x-ww-form-urlencoded and json. allow  ([c68faffc](https://github.com/SpoonX/aurelia-api/commit/c68faffc))
+
+
+#### Breaking Changes
+
+* registerEndpoint - defaults will now completely replace standard deafults. Needed  to submit multipart/form-data.
+
+ ([c68faffc](https://github.com/SpoonX/aurelia-api/commit/c68faffc))
+
+
+<a name"3.0.0-rc2"></a>
+### 3.0.0-rc2 (2016-05-04)
+
+
+#### Bug Fixes
+
+* **typings:** mark optional parameters ([18e86fc6](https://github.com/SpoonX/aurelia-api/commit/18e86fc6))
+
+
+<a name"3.0.0-rc1"></a>
+## 3.0.0-rc1 (2016-04-28)
+
+
+#### Bug Fixes
+
+* **Rest:** uppercase default methods ([a008536f](https://github.com/SpoonX/aurelia-api/commit/a008536f))
+
+
+#### Features
+
+* **Rest:** Add patch method, update docs for criteria implementation ([a0328aad](https://github.com/SpoonX/aurelia-api/commit/a0328aad))
+* **project:**
+  * bundle into single file ([b471d570](https://github.com/SpoonX/aurelia-api/commit/b471d570))
+  * Rename project to remove spoonx prefix ([5ab4d3e1](https://github.com/SpoonX/aurelia-api/commit/5ab4d3e1))
+
+
+#### Breaking Changes
+
+* all imports need to use 'aurelia-api'
+
+ ([b471d570](https://github.com/SpoonX/aurelia-api/commit/b471d570))
+
+
+<a name"2.2.0"></a>
+## 2.2.0 (2016-04-04)
+
+
+#### Bug Fixes
+
+* **d.ts:** exclude unnecessary imports. ([da3d23a8](https://github.com/SpoonX/aurelia-api/commit/da3d23a8))
+
+
+#### Features
+
+* **Rest:** add property 'endpoint' ([6b926212](https://github.com/SpoonX/aurelia-api/commit/6b926212))
+
+
+<a name"2.1.2"></a>
+### 2.1.2 (2016-03-25)
+
+
+<a name"2.1.1"></a>
+### 2.1.1 (2016-03-24)
+
+
+#### Bug Fixes
+
+* **config:** apply user endpoint defaults ([8b9344d7](https://github.com/SpoonX/aurelia-api/commit/8b9344d7))
+
+
+<a name"2.1.0"></a>
+## 2.1.0 (2016-03-23)
+
+#### Features
+
+* **project:** Added typescript support ([0581966](https://github.com/SpoonX/aurelia-api/commit/058196623407dc303e224fb19976ba6f5bf0a2fb))
+
+
 <a name"2.0.9"></a>
 ### 2.0.9 (2016-03-20)
 
-* Updated dependencies
 
 <a name"2.0.8"></a>
 ### 2.0.8 (2016-03-02)
@@ -130,5 +234,3 @@
 
 * **index:** Added configure convenience method ([6506ac25](https://github.com/SpoonX/aurelia-api/commit/6506ac25a749971e1165f69a28617f6865e07667))
 * **rest:** Use HttpClient from DI, so config gets applied ([14adca60](https://github.com/SpoonX/aurelia-api/commit/14adca60cebbd923230801702312bab80da2778c))
-
-

@@ -2,41 +2,33 @@ var _dec, _class3;
 
 import qs from 'qs';
 import extend from 'extend';
-import { json, HttpClient } from 'aurelia-fetch-client';
+import { HttpClient } from 'aurelia-fetch-client';
 import { resolver } from 'aurelia-dependency-injection';
 
 export let Rest = class Rest {
-  constructor(httpClient) {
-    this.client = httpClient;
-  }
-
-  request(method, path, body, options) {
-    let requestOptions = extend(true, {
-      method: method,
+  constructor(httpClient, endpoint) {
+    this.defaults = {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-      },
-      body: body
-    }, options || {});
+      }
+    };
 
-    if (typeof options !== 'undefined') {
-      extend(true, requestOptions, options);
-    }
+    this.client = httpClient;
+    this.endpoint = endpoint;
+  }
 
-    let interceptor = this.interceptor;
+  request(method, path, body, options = {}) {
+    let requestOptions = extend(true, { headers: {} }, this.defaults, options, { method, body });
 
-    if (interceptor && typeof interceptor.request === 'function') {
-      requestOptions = interceptor.request(requestOptions);
-    }
+    let contentType = requestOptions.headers['Content-Type'] || requestOptions.headers['content-type'];
 
-    if (typeof body === 'object') {
-      requestOptions.body = json(requestOptions.body);
+    if (typeof body === 'object' && contentType) {
+      requestOptions.body = contentType.toLowerCase() === 'application/json' ? JSON.stringify(body) : qs.stringify(body);
     }
 
     return this.client.fetch(path, requestOptions).then(response => {
       if (response.status >= 200 && response.status < 400) {
-
         let result = response.json().catch(error => null);
 
         if (interceptor && typeof interceptor.response === 'function') {
@@ -59,11 +51,11 @@ export let Rest = class Rest {
       requestPath += typeof criteria !== 'object' ? `/${ criteria }` : '?' + qs.stringify(criteria);
     }
 
-    return this.request('get', requestPath, undefined, options);
+    return this.request('GET', requestPath, undefined, options);
   }
 
   post(resource, body, options) {
-    return this.request('post', resource, body, options);
+    return this.request('POST', resource, body, options);
   }
 
   update(resource, criteria, body, options) {
@@ -73,7 +65,17 @@ export let Rest = class Rest {
       requestPath += typeof criteria !== 'object' ? `/${ criteria }` : '?' + qs.stringify(criteria);
     }
 
-    return this.request('put', requestPath, body, options);
+    return this.request('PUT', requestPath, body, options);
+  }
+
+  patch(resource, criteria, body, options) {
+    let requestPath = resource;
+
+    if (criteria) {
+      requestPath += typeof criteria !== 'object' ? `/${ criteria }` : '?' + qs.stringify(criteria);
+    }
+
+    return this.request('PATCH', requestPath, body, options);
   }
 
   destroy(resource, criteria, options) {
@@ -83,7 +85,7 @@ export let Rest = class Rest {
       requestPath += typeof criteria !== 'object' ? `/${ criteria }` : '?' + qs.stringify(criteria);
     }
 
-    return this.request('delete', requestPath, undefined, options);
+    return this.request('DELETE', requestPath, undefined, options);
   }
 
   create(resource, body, options) {
@@ -99,7 +101,9 @@ export let Config = class Config {
 
   registerEndpoint(name, configureMethod, defaults) {
     let newClient = new HttpClient();
-    this.endpoints[name] = new Rest(newClient);
+    this.endpoints[name] = new Rest(newClient, name);
+
+    if (defaults !== undefined) this.endpoints[name].defaults = defaults;
 
     if (typeof configureMethod === 'function') {
       newClient.configure(configureMethod);
@@ -113,10 +117,6 @@ export let Config = class Config {
 
     newClient.configure(configure => {
       configure.withBaseUrl(configureMethod);
-
-      if (typeof defaults === 'object') {
-        configure.withDefaults(defaults);
-      }
     });
 
     return this;

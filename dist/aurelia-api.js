@@ -1,57 +1,55 @@
 import qs from 'qs';
 import extend from 'extend';
-import {json,HttpClient} from 'aurelia-fetch-client';
+import {HttpClient} from 'aurelia-fetch-client';
 import {resolver} from 'aurelia-dependency-injection';
 
+/**
+ * Rest class. A simple rest client to fetch resources
+ */
 export class Rest {
   interceptor;
+
+  defaults = {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  }
 
   /**
    * Inject the httpClient to use for requests.
    *
-   * @param {HttpClient} httpClient
+   * @param {HttpClient} httpClient The httpClient to use
+   * @param {string}     [endpoint] The endpoint name
    */
-  constructor(httpClient) {
-    this.client = httpClient;
+  constructor(httpClient, endpoint) {
+    this.client   = httpClient;
+    this.endpoint = endpoint;
   }
 
   /**
    * Make a request to the server.
    *
-   * @param {string} method
-   * @param {string} path
-   * @param {{}}     [body]
-   * @param {{}}     [options]
+   * @param {string} method     The fetch method
+   * @param {string} path       Path to the resource
+   * @param {{}}     [body]     The body to send if applicable
+   * @param {{}}     [options]  Fetch options overwrites
    *
-   * @return {Promise}
+   * @return {Promise<Object>|Promise<Error>} Server response as Object
    */
-  request(method, path, body, options) {
-    let requestOptions = extend(true, {
-      method: method,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: body
-    }, options || {});
+  request(method, path, body, options = {}) {
+    let requestOptions = extend(true, {headers: {}}, this.defaults, options, {method, body});
 
-    if (typeof options !== 'undefined') {
-      extend(true, requestOptions, options);
-    }
+    let contentType = requestOptions.headers['Content-Type'] || requestOptions.headers['content-type'];
 
-    let interceptor = this.interceptor;
-
-    if (interceptor && typeof interceptor.request === 'function') {
-      requestOptions = interceptor.request(requestOptions);
-    }
-
-    if (typeof body === 'object') {
-      requestOptions.body = json(requestOptions.body);
+    if (typeof body === 'object' && contentType) {
+      requestOptions.body = contentType.toLowerCase() === 'application/json'
+                          ? JSON.stringify(body)
+                          : qs.stringify(body);
     }
 
     return this.client.fetch(path, requestOptions).then(response => {
       if (response.status >= 200 && response.status < 400) {
-
         let result = response.json().catch(error => null);
 
         if (interceptor && typeof interceptor.response === 'function') {
@@ -70,11 +68,11 @@ export class Rest {
   /**
    * Find a resource.
    *
-   * @param {string}           resource Resource to find in
-   * @param {{}|string|Number} criteria Object for where clause, string / number for id.
+   * @param {string}           resource  Resource to find in
+   * @param {{}|string|Number} criteria  Object for where clause, string / number for id.
    * @param {{}}               [options] Extra fetch options.
    *
-   * @return {Promise}
+   * @return {Promise<Object>|Promise<Error>} Server response as Object
    */
   find(resource, criteria, options) {
     let requestPath = resource;
@@ -83,31 +81,31 @@ export class Rest {
       requestPath += typeof criteria !== 'object' ? `/${criteria}` : '?' + qs.stringify(criteria);
     }
 
-    return this.request('get', requestPath, undefined, options);
+    return this.request('GET', requestPath, undefined, options);
   }
 
   /**
    * Create a new instance for resource.
    *
-   * @param {string} resource
-   * @param {{}}     body
-   * @param {{}}     [options]
+   * @param {string} resource  Resource to create
+   * @param {{}}     body      The data to post (as Object)
+   * @param {{}}     [options] Extra fetch options.
    *
-   * @return {Promise}
+   * @return {Promise<Object>|Promise<Error>} Server response as Object
    */
   post(resource, body, options) {
-    return this.request('post', resource, body, options);
+    return this.request('POST', resource, body, options);
   }
 
   /**
    * Update a resource.
    *
-   * @param {string}        resource  Resource to update
-   * @param {string|Number} criteria  String / number of the id to update.
-   * @param {object}        body      New data for provided criteria.
-   * @param {{}}            [options]
+   * @param {string}           resource  Resource to update
+   * @param {{}|string|Number} criteria  Object for where clause, string / number for id.
+   * @param {object}           body      New data for provided criteria.
+   * @param {{}}               [options] Extra fetch options.
    *
-   * @return {Promise}
+   * @return {Promise<Object>|Promise<Error>} Server response as Object
    */
   update(resource, criteria, body, options) {
     let requestPath = resource;
@@ -116,17 +114,37 @@ export class Rest {
       requestPath += typeof criteria !== 'object' ? `/${criteria}` : '?' + qs.stringify(criteria);
     }
 
-    return this.request('put', requestPath, body, options);
+    return this.request('PUT', requestPath, body, options);
+  }
+
+  /**
+   * Patch a resource.
+   *
+   * @param {string}           resource  Resource to patch
+   * @param {{}|string|Number} criteria  Object for where clause, string / number for id.
+   * @param {object}           body      Data to patch for provided criteria.
+   * @param {{}}               [options] Extra fetch options.
+   *
+   * @return {Promise<Object>|Promise<Error>} Server response as Object
+   */
+  patch(resource, criteria, body, options) {
+    let requestPath = resource;
+
+    if (criteria) {
+      requestPath += typeof criteria !== 'object' ? `/${criteria}` : '?' + qs.stringify(criteria);
+    }
+
+    return this.request('PATCH', requestPath, body, options);
   }
 
   /**
    * Delete a resource.
    *
-   * @param {string}        resource  The resource to delete in
-   * @param {string|Number} criteria  String / number of the id to delete.
-   * @param {{}}            [options]
+   * @param {string}           resource  The resource to delete
+   * @param {{}|string|Number} criteria  Object for where clause, string / number for id.
+   * @param {{}}               [options] Extra fetch options.
    *
-   * @return {Promise}
+   * @return {Promise<Object>|Promise<Error>} Server response as Object
    */
   destroy(resource, criteria, options) {
     let requestPath = resource;
@@ -135,40 +153,55 @@ export class Rest {
       requestPath += typeof criteria !== 'object' ? `/${criteria}` : '?' + qs.stringify(criteria);
     }
 
-    return this.request('delete', requestPath, undefined, options);
+    return this.request('DELETE', requestPath, undefined, options);
   }
 
   /**
    * Create a new instance for resource.
    *
-   * @param {string} resource
-   * @param {{}}     body
-   * @param {{}}     [options]
+   * @param {string} resource  The resource to create
+   * @param {{}}     body      The data to post (as Object)
+   * @param {{}}     [options] Extra fetch options.
    *
-   * @return {Promise}
+   * @return {Promise<Object>|Promise<Error>} Server response as Object
    */
   create(resource, body, options) {
     return this.post(...arguments);
   }
 }
 
+/**
+ * Config class. Configures and stores endpoints
+ */
 export class Config {
-  endpoints        = {};
-  defaultEndpoint  = null;
+  /**
+   * Collection of configures endpionts
+   * @param {Object} Key: endpoint name, value: Rest client
+   */
+  endpoints       = {};
+
+  /**
+   * Current default endpoint if set
+   * @param {[Rest]} Default Rest client
+   */
+  defaultEndpoint = null;
 
   /**
    * Register a new endpoint.
    *
    * @param {string}          name              The name of the new endpoint.
    * @param {function|string} [configureMethod] Configure method or endpoint.
-   * @param {{}}              [defaults]        Defaults for the HttpClient
+   * @param {{}}              [defaults]        New defaults for the HttpClient
    *
    * @see http://aurelia.io/docs.html#/aurelia/fetch-client/latest/doc/api/class/HttpClientConfiguration
    * @return {Config}
    */
   registerEndpoint(name, configureMethod, defaults) {
     let newClient        = new HttpClient();
-    this.endpoints[name] = new Rest(newClient);
+    this.endpoints[name] = new Rest(newClient, name);
+
+    // set custom defaults to Rest
+    if (defaults !== undefined) this.endpoints[name].defaults = defaults;
 
     // Manual configure of client.
     if (typeof configureMethod === 'function') {
@@ -185,11 +218,6 @@ export class Config {
     // Base url is string. Configure.
     newClient.configure(configure => {
       configure.withBaseUrl(configureMethod);
-
-      // Set optional defaults.
-      if (typeof defaults === 'object') {
-        configure.withDefaults(defaults);
-      }
     });
 
     return this;
@@ -198,7 +226,7 @@ export class Config {
   /**
    * Get a previously registered endpoint. Returns null when not found.
    *
-   * @param {string} [name] Returns default endpoint when not set.
+   * @param {string} [name] Endpoint bame. Returns default endpoint when not set.
    *
    * @return {Rest|null}
    */
@@ -213,7 +241,7 @@ export class Config {
   /**
    * Check if an endpoint has been registered.
    *
-   * @param {string} name
+   * @param {string} name The endpoint name
    *
    * @return {boolean}
    */
@@ -224,7 +252,7 @@ export class Config {
   /**
    * Set a previously registered endpoint as the default.
    *
-   * @param {string} name
+   * @param {string} name The endpoint name
    *
    * @return {Config}
    */
@@ -253,6 +281,9 @@ export class Config {
   }
 }
 
+/**
+ * Endpoint class. A resolver for endpoints which allows injection of the corresponding Rest client into a class
+ */
 @resolver()
 export class Endpoint {
 
@@ -270,7 +301,7 @@ export class Endpoint {
    *
    * @param {Container} container
    *
-   * @return {*}
+   * @return {Rest}
    */
   get(container) {
     return container.get(Config).getEndpoint(this._key);
@@ -279,9 +310,9 @@ export class Endpoint {
   /**
    * Get a new resolver for `key`.
    *
-   * @param {string} key
+   * @param {string} key  The endpoint name
    *
-   * @return {Endpoint}
+   * @return {Endpoint}  Resolves to the Rest client for this endpoint
    */
   static of(key) {
     return new Endpoint(key);

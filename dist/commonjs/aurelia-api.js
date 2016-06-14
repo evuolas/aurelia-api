@@ -26,39 +26,33 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Rest = exports.Rest = function () {
-  function Rest(httpClient) {
+  function Rest(httpClient, endpoint) {
     _classCallCheck(this, Rest);
 
-    this.client = httpClient;
-  }
-
-  Rest.prototype.request = function request(method, path, body, options) {
-    var requestOptions = (0, _extend2.default)(true, {
-      method: method,
+    this.defaults = {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-      },
-      body: body
-    }, options || {});
+      }
+    };
 
-    if (typeof options !== 'undefined') {
-      (0, _extend2.default)(true, requestOptions, options);
-    }
+    this.client = httpClient;
+    this.endpoint = endpoint;
+  }
 
-    var interceptor = this.interceptor;
+  Rest.prototype.request = function request(method, path, body) {
+    var options = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
 
-    if (interceptor && typeof interceptor.request === 'function') {
-      requestOptions = interceptor.request(requestOptions);
-    }
+    var requestOptions = (0, _extend2.default)(true, { headers: {} }, this.defaults, options, { method: method, body: body });
 
-    if ((typeof body === 'undefined' ? 'undefined' : _typeof(body)) === 'object') {
-      requestOptions.body = (0, _aureliaFetchClient.json)(requestOptions.body);
+    var contentType = requestOptions.headers['Content-Type'] || requestOptions.headers['content-type'];
+
+    if ((typeof body === 'undefined' ? 'undefined' : _typeof(body)) === 'object' && contentType) {
+      requestOptions.body = contentType.toLowerCase() === 'application/json' ? JSON.stringify(body) : _qs2.default.stringify(body);
     }
 
     return this.client.fetch(path, requestOptions).then(function (response) {
       if (response.status >= 200 && response.status < 400) {
-
         var result = response.json().catch(function (error) {
           return null;
         });
@@ -83,11 +77,11 @@ var Rest = exports.Rest = function () {
       requestPath += (typeof criteria === 'undefined' ? 'undefined' : _typeof(criteria)) !== 'object' ? '/' + criteria : '?' + _qs2.default.stringify(criteria);
     }
 
-    return this.request('get', requestPath, undefined, options);
+    return this.request('GET', requestPath, undefined, options);
   };
 
   Rest.prototype.post = function post(resource, body, options) {
-    return this.request('post', resource, body, options);
+    return this.request('POST', resource, body, options);
   };
 
   Rest.prototype.update = function update(resource, criteria, body, options) {
@@ -97,7 +91,17 @@ var Rest = exports.Rest = function () {
       requestPath += (typeof criteria === 'undefined' ? 'undefined' : _typeof(criteria)) !== 'object' ? '/' + criteria : '?' + _qs2.default.stringify(criteria);
     }
 
-    return this.request('put', requestPath, body, options);
+    return this.request('PUT', requestPath, body, options);
+  };
+
+  Rest.prototype.patch = function patch(resource, criteria, body, options) {
+    var requestPath = resource;
+
+    if (criteria) {
+      requestPath += (typeof criteria === 'undefined' ? 'undefined' : _typeof(criteria)) !== 'object' ? '/' + criteria : '?' + _qs2.default.stringify(criteria);
+    }
+
+    return this.request('PATCH', requestPath, body, options);
   };
 
   Rest.prototype.destroy = function destroy(resource, criteria, options) {
@@ -107,7 +111,7 @@ var Rest = exports.Rest = function () {
       requestPath += (typeof criteria === 'undefined' ? 'undefined' : _typeof(criteria)) !== 'object' ? '/' + criteria : '?' + _qs2.default.stringify(criteria);
     }
 
-    return this.request('delete', requestPath, undefined, options);
+    return this.request('DELETE', requestPath, undefined, options);
   };
 
   Rest.prototype.create = function create(resource, body, options) {
@@ -127,7 +131,9 @@ var Config = exports.Config = function () {
 
   Config.prototype.registerEndpoint = function registerEndpoint(name, configureMethod, defaults) {
     var newClient = new _aureliaFetchClient.HttpClient();
-    this.endpoints[name] = new Rest(newClient);
+    this.endpoints[name] = new Rest(newClient, name);
+
+    if (defaults !== undefined) this.endpoints[name].defaults = defaults;
 
     if (typeof configureMethod === 'function') {
       newClient.configure(configureMethod);
@@ -141,10 +147,6 @@ var Config = exports.Config = function () {
 
     newClient.configure(function (configure) {
       configure.withBaseUrl(configureMethod);
-
-      if ((typeof defaults === 'undefined' ? 'undefined' : _typeof(defaults)) === 'object') {
-        configure.withDefaults(defaults);
-      }
     });
 
     return this;
