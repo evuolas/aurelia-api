@@ -56,6 +56,8 @@ define(['exports', 'qs', 'extend', 'aurelia-fetch-client', 'aurelia-dependency-i
         requestOptions.body = contentType.toLowerCase() === 'application/json' ? JSON.stringify(body) : _qs2.default.stringify(body);
       }
 
+      var interceptor = this.interceptor;
+
       return this.client.fetch(path, requestOptions).then(function (response) {
         if (response.status >= 200 && response.status < 400) {
           var result = response.json().catch(function (error) {

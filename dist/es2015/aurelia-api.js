@@ -27,6 +27,8 @@ export let Rest = class Rest {
       requestOptions.body = contentType.toLowerCase() === 'application/json' ? JSON.stringify(body) : qs.stringify(body);
     }
 
+    const interceptor = this.interceptor;
+
     return this.client.fetch(path, requestOptions).then(response => {
       if (response.status >= 200 && response.status < 400) {
         let result = response.json().catch(error => null);

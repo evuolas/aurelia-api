@@ -60,6 +60,8 @@ System.register(['qs', 'extend', 'aurelia-fetch-client', 'aurelia-dependency-inj
             requestOptions.body = contentType.toLowerCase() === 'application/json' ? JSON.stringify(body) : qs.stringify(body);
           }
 
+          var interceptor = this.interceptor;
+
           return this.client.fetch(path, requestOptions).then(function (response) {
             if (response.status >= 200 && response.status < 400) {
               var result = response.json().catch(function (error) {
