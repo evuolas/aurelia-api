@@ -20,14 +20,16 @@ export let Rest = class Rest {
 
   request(method, path, body, options = {}) {
     let requestOptions = extend(true, { headers: {} }, this.defaults, options, { method, body });
-
     let contentType = requestOptions.headers['Content-Type'] || requestOptions.headers['content-type'];
+    let interceptor = this.interceptor;
 
-    if (typeof body === 'object' && contentType) {
-      requestOptions.body = contentType.toLowerCase() === 'application/json' ? JSON.stringify(body) : qs.stringify(body);
+    if (interceptor && typeof interceptor.request === 'function') {
+      requestOptions = interceptor.request(requestOptions);
     }
 
-    const interceptor = this.interceptor;
+    if (typeof requestOptions.body === 'object' && contentType) {
+      requestOptions.body = contentType.toLowerCase() === 'application/json' ? JSON.stringify(requestOptions.body) : qs.stringify(requestOptions.body);
+    }
 
     return this.client.fetch(path, requestOptions).then(response => {
       if (response.status >= 200 && response.status < 400) {

@@ -44,14 +44,16 @@ var Rest = exports.Rest = function () {
     var options = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
 
     var requestOptions = (0, _extend2.default)(true, { headers: {} }, this.defaults, options, { method: method, body: body });
-
     var contentType = requestOptions.headers['Content-Type'] || requestOptions.headers['content-type'];
+    var interceptor = this.interceptor;
 
-    if ((typeof body === 'undefined' ? 'undefined' : _typeof(body)) === 'object' && contentType) {
-      requestOptions.body = contentType.toLowerCase() === 'application/json' ? JSON.stringify(body) : _qs2.default.stringify(body);
+    if (interceptor && typeof interceptor.request === 'function') {
+      requestOptions = interceptor.request(requestOptions);
     }
 
-    var interceptor = this.interceptor;
+    if (_typeof(requestOptions.body) === 'object' && contentType) {
+      requestOptions.body = contentType.toLowerCase() === 'application/json' ? JSON.stringify(requestOptions.body) : _qs2.default.stringify(requestOptions.body);
+    }
 
     return this.client.fetch(path, requestOptions).then(function (response) {
       if (response.status >= 200 && response.status < 400) {
