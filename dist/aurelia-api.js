@@ -79,13 +79,7 @@ export class Rest {
    * @return {Promise<Object>|Promise<Error>} Server response as Object
    */
   find(resource, criteria, options) {
-    let requestPath = resource;
-
-    if (criteria) {
-      requestPath += typeof criteria !== 'object' ? `/${criteria}` : '?' + qs.stringify(criteria);
-    }
-
-    return this.request('GET', requestPath, undefined, options);
+    return this.request('GET', getRequestPath(resource, criteria), undefined, options);
   }
 
   /**
@@ -112,13 +106,7 @@ export class Rest {
    * @return {Promise<Object>|Promise<Error>} Server response as Object
    */
   update(resource, criteria, body, options) {
-    let requestPath = resource;
-
-    if (criteria) {
-      requestPath += typeof criteria !== 'object' ? `/${criteria}` : '?' + qs.stringify(criteria);
-    }
-
-    return this.request('PUT', requestPath, body, options);
+    return this.request('PUT', getRequestPath(resource, criteria), body, options);
   }
 
   /**
@@ -132,13 +120,7 @@ export class Rest {
    * @return {Promise<Object>|Promise<Error>} Server response as Object
    */
   patch(resource, criteria, body, options) {
-    let requestPath = resource;
-
-    if (criteria) {
-      requestPath += typeof criteria !== 'object' ? `/${criteria}` : '?' + qs.stringify(criteria);
-    }
-
-    return this.request('PATCH', requestPath, body, options);
+    return this.request('PATCH', getRequestPath(resource, criteria), body, options);
   }
 
   /**
@@ -151,13 +133,7 @@ export class Rest {
    * @return {Promise<Object>|Promise<Error>} Server response as Object
    */
   destroy(resource, criteria, options) {
-    let requestPath = resource;
-
-    if (criteria) {
-      requestPath += typeof criteria !== 'object' ? `/${criteria}` : '?' + qs.stringify(criteria);
-    }
-
-    return this.request('DELETE', requestPath, undefined, options);
+    return this.request('DELETE', getRequestPath(resource, criteria), undefined, options);
   }
 
   /**
@@ -172,6 +148,19 @@ export class Rest {
   create(resource, body, options) {
     return this.post(...arguments);
   }
+}
+
+function getRequestPath(resource, criteria) {
+  if (typeof criteria === 'object' && criteria !== null) {
+    const query = qs.stringify(criteria, {
+      filter: (prefix, value) => prefix === 'id' ? undefined : value
+    });
+    resource += `${criteria.id ? `/${criteria.id}` : ''}?${query}`;
+  } else if (criteria) {
+    resource += `/${criteria}`;
+  }
+
+  return resource.replace(/\/\//g, '/');
 }
 
 /**

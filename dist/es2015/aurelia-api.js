@@ -49,13 +49,7 @@ export let Rest = class Rest {
   }
 
   find(resource, criteria, options) {
-    let requestPath = resource;
-
-    if (criteria) {
-      requestPath += typeof criteria !== 'object' ? `/${ criteria }` : '?' + qs.stringify(criteria);
-    }
-
-    return this.request('GET', requestPath, undefined, options);
+    return this.request('GET', getRequestPath(resource, criteria), undefined, options);
   }
 
   post(resource, body, options) {
@@ -63,39 +57,34 @@ export let Rest = class Rest {
   }
 
   update(resource, criteria, body, options) {
-    let requestPath = resource;
-
-    if (criteria) {
-      requestPath += typeof criteria !== 'object' ? `/${ criteria }` : '?' + qs.stringify(criteria);
-    }
-
-    return this.request('PUT', requestPath, body, options);
+    return this.request('PUT', getRequestPath(resource, criteria), body, options);
   }
 
   patch(resource, criteria, body, options) {
-    let requestPath = resource;
-
-    if (criteria) {
-      requestPath += typeof criteria !== 'object' ? `/${ criteria }` : '?' + qs.stringify(criteria);
-    }
-
-    return this.request('PATCH', requestPath, body, options);
+    return this.request('PATCH', getRequestPath(resource, criteria), body, options);
   }
 
   destroy(resource, criteria, options) {
-    let requestPath = resource;
-
-    if (criteria) {
-      requestPath += typeof criteria !== 'object' ? `/${ criteria }` : '?' + qs.stringify(criteria);
-    }
-
-    return this.request('DELETE', requestPath, undefined, options);
+    return this.request('DELETE', getRequestPath(resource, criteria), undefined, options);
   }
 
   create(resource, body, options) {
     return this.post(...arguments);
   }
 };
+
+function getRequestPath(resource, criteria) {
+  if (typeof criteria === 'object' && criteria !== null) {
+    const query = qs.stringify(criteria, {
+      filter: (prefix, value) => prefix === 'id' ? undefined : value
+    });
+    resource += `${ criteria.id ? `/${ criteria.id }` : '' }?${ query }`;
+  } else if (criteria) {
+    resource += `/${ criteria }`;
+  }
+
+  return resource.replace(/\/\//g, '/');
+}
 
 export let Config = class Config {
   constructor() {

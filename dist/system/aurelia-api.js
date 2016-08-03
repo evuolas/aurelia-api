@@ -11,6 +11,21 @@ System.register(['qs', 'extend', 'aurelia-fetch-client', 'aurelia-dependency-inj
     }
   }
 
+  function getRequestPath(resource, criteria) {
+    if ((typeof criteria === 'undefined' ? 'undefined' : _typeof(criteria)) === 'object' && criteria !== null) {
+      var query = qs.stringify(criteria, {
+        filter: function filter(prefix, value) {
+          return prefix === 'id' ? undefined : value;
+        }
+      });
+      resource += (criteria.id ? '/' + criteria.id : '') + '?' + query;
+    } else if (criteria) {
+      resource += '/' + criteria;
+    }
+
+    return resource.replace(/\/\//g, '/');
+  }
+
   function configure(aurelia, configCallback) {
     var config = aurelia.container.get(Config);
 
@@ -84,13 +99,7 @@ System.register(['qs', 'extend', 'aurelia-fetch-client', 'aurelia-dependency-inj
         };
 
         Rest.prototype.find = function find(resource, criteria, options) {
-          var requestPath = resource;
-
-          if (criteria) {
-            requestPath += (typeof criteria === 'undefined' ? 'undefined' : _typeof(criteria)) !== 'object' ? '/' + criteria : '?' + qs.stringify(criteria);
-          }
-
-          return this.request('GET', requestPath, undefined, options);
+          return this.request('GET', getRequestPath(resource, criteria), undefined, options);
         };
 
         Rest.prototype.post = function post(resource, body, options) {
@@ -98,33 +107,15 @@ System.register(['qs', 'extend', 'aurelia-fetch-client', 'aurelia-dependency-inj
         };
 
         Rest.prototype.update = function update(resource, criteria, body, options) {
-          var requestPath = resource;
-
-          if (criteria) {
-            requestPath += (typeof criteria === 'undefined' ? 'undefined' : _typeof(criteria)) !== 'object' ? '/' + criteria : '?' + qs.stringify(criteria);
-          }
-
-          return this.request('PUT', requestPath, body, options);
+          return this.request('PUT', getRequestPath(resource, criteria), body, options);
         };
 
         Rest.prototype.patch = function patch(resource, criteria, body, options) {
-          var requestPath = resource;
-
-          if (criteria) {
-            requestPath += (typeof criteria === 'undefined' ? 'undefined' : _typeof(criteria)) !== 'object' ? '/' + criteria : '?' + qs.stringify(criteria);
-          }
-
-          return this.request('PATCH', requestPath, body, options);
+          return this.request('PATCH', getRequestPath(resource, criteria), body, options);
         };
 
         Rest.prototype.destroy = function destroy(resource, criteria, options) {
-          var requestPath = resource;
-
-          if (criteria) {
-            requestPath += (typeof criteria === 'undefined' ? 'undefined' : _typeof(criteria)) !== 'object' ? '/' + criteria : '?' + qs.stringify(criteria);
-          }
-
-          return this.request('DELETE', requestPath, undefined, options);
+          return this.request('DELETE', getRequestPath(resource, criteria), undefined, options);
         };
 
         Rest.prototype.create = function create(resource, body, options) {

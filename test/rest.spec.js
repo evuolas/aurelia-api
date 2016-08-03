@@ -48,6 +48,11 @@ describe('Rest', function() {
             expect(y.path).toBe('/posts/id');
             expect(JSON.stringify(y.query)).toBe('{}');
           }),
+        injectTest.apiEndpoint.find('posts', { id: 'id' })
+          .then(y => {
+            expect(y.path).toBe('/posts/id');
+            expect(JSON.stringify(y.query)).toBe('{}');
+          }),
         injectTest.apiEndpoint.find('posts', criteria)
           .then(y => {
             expect(y.path).toBe('/posts');
