@@ -41,13 +41,14 @@ declare module 'aurelia-api' {
     /**
        * Create a new instance for resource.
        *
-       * @param {string} resource  Resource to create
-       * @param {{}}     body      The data to post (as Object)
-       * @param {{}}     [options] Extra fetch options.
+       * @param {string}           resource  Resource to create
+       * @param {{}|string|Number} criteria  Object for where clause, string / number for id.
+       * @param {{}}               body      The data to post (as Object)
+       * @param {{}}               [options] Extra fetch options.
        *
        * @return {Promise<Object>|Promise<Error>} Server response as Object
        */
-    post(resource?: any, body?: any, options?: any): any;
+    post(resource?: any, criteria?: any, body?: any, options?: any): any;
     
     /**
        * Update a resource.
@@ -87,13 +88,14 @@ declare module 'aurelia-api' {
     /**
        * Create a new instance for resource.
        *
-       * @param {string} resource  The resource to create
-       * @param {{}}     body      The data to post (as Object)
-       * @param {{}}     [options] Extra fetch options.
+       * @param {string}           resource  The resource to create
+       * @param {{}|string|Number} criteria  Object for where clause, string / number for id.
+       * @param {{}}               body      The data to post (as Object)
+       * @param {{}}               [options] Extra fetch options.
        *
        * @return {Promise<Object>|Promise<Error>} Server response as Object
        */
-    create(resource?: any, body?: any, options?: any): any;
+    create(resource?: any, criteria?: any, body?: any, options?: any): any;
   }
   
   /**

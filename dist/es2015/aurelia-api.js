@@ -52,8 +52,8 @@ export let Rest = class Rest {
     return this.request('GET', getRequestPath(resource, criteria), undefined, options);
   }
 
-  post(resource, body, options) {
-    return this.request('POST', resource, body, options);
+  post(resource, criteria, body, options) {
+    return this.request('POST', getRequestPath(resource, criteria), body, options);
   }
 
   update(resource, criteria, body, options) {
@@ -68,7 +68,7 @@ export let Rest = class Rest {
     return this.request('DELETE', getRequestPath(resource, criteria), undefined, options);
   }
 
-  create(resource, body, options) {
+  create(resource, criteria, body, options) {
     return this.post(...arguments);
   }
 };
