@@ -145,7 +145,7 @@ describe('Rest', function() {
     it('Should create body (as json).', function(done) {
       let injectTest = container.get(InjectTest);
 
-      injectTest.apiEndpoint.create('posts', null, body)
+      injectTest.apiEndpoint.create('posts', body)
         .then(y => {
           expect(y.method).toBe('POST');
           expect(y.path).toBe('/posts');
@@ -154,14 +154,13 @@ describe('Rest', function() {
         });
     });
 
-    it('Should create body (as json), criteria and options.', function(done) {
+    it('Should create body (as json) and options.', function(done) {
       let injectTest = container.get(InjectTest);
 
-      injectTest.apiEndpoint.create('posts', criteria, body, options)
+      injectTest.apiEndpoint.create('posts', body, options)
         .then(y => {
           expect(y.method).toBe('POST');
           expect(y.path).toBe('/posts');
-          expect(JSON.stringify(y.query)).toBe(JSON.stringify(criteria));
           expect(y.contentType).toMatch(options.headers['Content-Type']);
           expect(y.Authorization).toBe(options.headers['Authorization']);
           done();
@@ -173,7 +172,7 @@ describe('Rest', function() {
     it('Should post body (as urlencoded).', function(done) {
       let injectTest = container.get(InjectTest);
 
-      injectTest.apiEndpoint.post('posts', null, body, options)
+      injectTest.apiEndpoint.post('posts', body, options)
         .then(y => {
           expect(JSON.stringify(y.body)).toBe(JSON.stringify(y.body));
           expect(y.method).toBe('POST');
@@ -190,7 +189,7 @@ describe('Rest', function() {
       let data = new FormData();
       data.append('message', 'some');
 
-      injectTest.formEndpoint.post('uploads', null, data, {headers: {'Authorization': 'Bearer aToken'}})
+      injectTest.formEndpoint.post('uploads', data, {headers: {'Authorization': 'Bearer aToken'}})
         .then(y => {
           expect(y.method).toBe('POST');
           expect(y.path).toBe('/uploads');

@@ -83,15 +83,14 @@ export class Rest {
   /**
    * Create a new instance for resource.
    *
-   * @param {string}           resource  Resource to create
-   * @param {{}|string|Number} criteria  Object for where clause, string / number for id.
-   * @param {{}}               body      The data to post (as Object)
-   * @param {{}}               [options] Extra fetch options.
+   * @param {string} resource  Resource to create
+   * @param {{}}     body      The data to post (as Object)
+   * @param {{}}     [options] Extra fetch options.
    *
    * @return {Promise<Object>|Promise<Error>} Server response as Object
    */
-  post(resource, criteria, body, options) {
-    return this.request('POST', getRequestPath(resource, criteria), body, options);
+  post(resource, body, options) {
+    return this.request('POST', resource, body, options);
   }
 
   /**
@@ -138,14 +137,13 @@ export class Rest {
   /**
    * Create a new instance for resource.
    *
-   * @param {string}           resource  The resource to create
-   * @param {{}|string|Number} criteria  Object for where clause, string / number for id.
-   * @param {{}}               body      The data to post (as Object)
-   * @param {{}}               [options] Extra fetch options.
+   * @param {string} resource  The resource to create
+   * @param {{}}     body      The data to post (as Object)
+   * @param {{}}     [options] Extra fetch options.
    *
    * @return {Promise<Object>|Promise<Error>} Server response as Object
    */
-  create(resource, criteria, body, options) {
+  create(resource, body, options) {
     return this.post(...arguments);
   }
 }

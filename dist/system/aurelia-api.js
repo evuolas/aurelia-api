@@ -102,8 +102,8 @@ System.register(['qs', 'extend', 'aurelia-fetch-client', 'aurelia-dependency-inj
           return this.request('GET', getRequestPath(resource, criteria), undefined, options);
         };
 
-        Rest.prototype.post = function post(resource, criteria, body, options) {
-          return this.request('POST', getRequestPath(resource, criteria), body, options);
+        Rest.prototype.post = function post(resource, body, options) {
+          return this.request('POST', resource, body, options);
         };
 
         Rest.prototype.update = function update(resource, criteria, body, options) {
@@ -118,7 +118,7 @@ System.register(['qs', 'extend', 'aurelia-fetch-client', 'aurelia-dependency-inj
           return this.request('DELETE', getRequestPath(resource, criteria), undefined, options);
         };
 
-        Rest.prototype.create = function create(resource, criteria, body, options) {
+        Rest.prototype.create = function create(resource, body, options) {
           return this.post.apply(this, arguments);
         };
 
