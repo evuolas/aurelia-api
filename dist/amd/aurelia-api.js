@@ -1,12 +1,11 @@
-define(['exports', 'qs', 'extend', 'aurelia-fetch-client', 'aurelia-dependency-injection'], function (exports, _qs, _extend, _aureliaFetchClient, _aureliaDependencyInjection) {
+define(['exports', 'extend', 'aurelia-path', 'aurelia-fetch-client', 'aurelia-dependency-injection'], function (exports, _extend, _aureliaPath, _aureliaFetchClient, _aureliaDependencyInjection) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-  exports.configure = exports.Endpoint = exports.Config = exports.Rest = undefined;
-
-  var _qs2 = _interopRequireDefault(_qs);
+  exports.Endpoint = exports.Config = exports.Rest = undefined;
+  exports.configure = configure;
 
   var _extend2 = _interopRequireDefault(_extend);
 
@@ -21,18 +20,14 @@ define(['exports', 'qs', 'extend', 'aurelia-fetch-client', 'aurelia-dependency-i
   var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
     return typeof obj;
   } : function (obj) {
-    return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+    return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
   };
 
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
+  
 
   var Rest = exports.Rest = function () {
-    function Rest(httpClient, endpoint) {
-      _classCallCheck(this, Rest);
+    function Rest(httpClient, endpoint, useTraditionalUriTemplates) {
+      
 
       this.defaults = {
         headers: {
@@ -43,21 +38,15 @@ define(['exports', 'qs', 'extend', 'aurelia-fetch-client', 'aurelia-dependency-i
 
       this.client = httpClient;
       this.endpoint = endpoint;
+      this.useTraditionalUriTemplates = !!useTraditionalUriTemplates;
     }
 
-    Rest.prototype.request = function request(method, path, body) {
-      var options = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
-
-      var requestOptions = (0, _extend2.default)(true, { headers: {} }, this.defaults, options, { method: method, body: body });
+    Rest.prototype.request = function request(method, path, body, options) {
+      var requestOptions = (0, _extend2.default)(true, { headers: {} }, this.defaults, options || {}, { method: method, body: body });
       var contentType = requestOptions.headers['Content-Type'] || requestOptions.headers['content-type'];
-      var interceptor = this.interceptor;
 
-      if (interceptor && typeof interceptor.request === 'function') {
-        requestOptions = interceptor.request(requestOptions);
-      }
-
-      if (_typeof(requestOptions.body) === 'object' && contentType) {
-        requestOptions.body = contentType.toLowerCase() === 'application/json' ? JSON.stringify(requestOptions.body) : _qs2.default.stringify(requestOptions.body);
+      if ((typeof body === 'undefined' ? 'undefined' : _typeof(body)) === 'object' && body !== null && contentType) {
+        requestOptions.body = /^application\/json/.test(contentType.toLowerCase()) ? JSON.stringify(body) : (0, _aureliaPath.buildQueryString)(body);
       }
 
       return this.client.fetch(path, requestOptions).then(function (response) {
@@ -71,69 +60,94 @@ define(['exports', 'qs', 'extend', 'aurelia-fetch-client', 'aurelia-dependency-i
               return interceptor.response(res);
             });
           }
-
-          return result;
         }
 
         throw response;
       });
     };
 
-    Rest.prototype.find = function find(resource, criteria, options) {
-      return this.request('GET', getRequestPath(resource, criteria), undefined, options);
+    Rest.prototype.find = function find(resource, idOrCriteria, options) {
+      return this.request('GET', getRequestPath(resource, this.useTraditionalUriTemplates, idOrCriteria), undefined, options);
+    };
+
+    Rest.prototype.findOne = function findOne(resource, id, criteria, options) {
+      return this.request('GET', getRequestPath(resource, this.useTraditionalUriTemplates, id, criteria), undefined, options);
     };
 
     Rest.prototype.post = function post(resource, body, options) {
       return this.request('POST', resource, body, options);
     };
 
-    Rest.prototype.update = function update(resource, criteria, body, options) {
-      return this.request('PUT', getRequestPath(resource, criteria), body, options);
+    Rest.prototype.update = function update(resource, idOrCriteria, body, options) {
+      return this.request('PUT', getRequestPath(resource, this.useTraditionalUriTemplates, idOrCriteria), body, options);
     };
 
-    Rest.prototype.patch = function patch(resource, criteria, body, options) {
-      return this.request('PATCH', getRequestPath(resource, criteria), body, options);
+    Rest.prototype.updateOne = function updateOne(resource, id, criteria, body, options) {
+      return this.request('PUT', getRequestPath(resource, this.useTraditionalUriTemplates, id, criteria), body, options);
     };
 
-    Rest.prototype.destroy = function destroy(resource, criteria, options) {
-      return this.request('DELETE', getRequestPath(resource, criteria), undefined, options);
+    Rest.prototype.patch = function patch(resource, idOrCriteria, body, options) {
+      return this.request('PATCH', getRequestPath(resource, this.useTraditionalUriTemplates, idOrCriteria), body, options);
+    };
+
+    Rest.prototype.patchOne = function patchOne(resource, id, criteria, body, options) {
+      return this.request('PATCH', getRequestPath(resource, this.useTraditionalUriTemplates, id, criteria), body, options);
+    };
+
+    Rest.prototype.destroy = function destroy(resource, idOrCriteria, options) {
+      return this.request('DELETE', getRequestPath(resource, this.useTraditionalUriTemplates, idOrCriteria), undefined, options);
+    };
+
+    Rest.prototype.destroyOne = function destroyOne(resource, id, criteria, options) {
+      return this.request('DELETE', getRequestPath(resource, this.useTraditionalUriTemplates, id, criteria), undefined, options);
     };
 
     Rest.prototype.create = function create(resource, body, options) {
-      return this.post.apply(this, arguments);
+      return this.post(resource, body, options);
     };
 
     return Rest;
   }();
 
-  function getRequestPath(resource, criteria) {
-    if ((typeof criteria === 'undefined' ? 'undefined' : _typeof(criteria)) === 'object' && criteria !== null) {
-      var query = _qs2.default.stringify(criteria, {
-        filter: function filter(prefix, value) {
-          return prefix === 'id' ? undefined : value;
-        }
-      });
-      resource += (criteria.id ? '/' + criteria.id : '') + '?' + query;
-    } else if (criteria) {
-      resource += '/' + criteria;
+  function getRequestPath(resource, traditional, idOrCriteria, criteria) {
+    var hasSlash = resource.slice(-1) === '/';
+
+    if (typeof idOrCriteria === 'string' || typeof idOrCriteria === 'number') {
+      resource = '' + (0, _aureliaPath.join)(resource, String(idOrCriteria)) + (hasSlash ? '/' : '');
+    } else {
+      criteria = idOrCriteria;
     }
 
-    return resource.replace(/\/\//g, '/');
+    if ((typeof criteria === 'undefined' ? 'undefined' : _typeof(criteria)) === 'object' && criteria !== null) {
+      resource += '?' + (0, _aureliaPath.buildQueryString)(criteria, traditional);
+    } else if (criteria) {
+      resource += '' + (hasSlash ? '' : '/') + criteria + (hasSlash ? '/' : '');
+    }
+
+    return resource;
   }
 
   var Config = exports.Config = function () {
     function Config() {
-      _classCallCheck(this, Config);
+      
 
       this.endpoints = {};
-      this.defaultEndpoint = null;
     }
 
-    Config.prototype.registerEndpoint = function registerEndpoint(name, configureMethod, defaults) {
-      var newClient = new _aureliaFetchClient.HttpClient();
-      this.endpoints[name] = new Rest(newClient, name);
+    Config.prototype.registerEndpoint = function registerEndpoint(name, configureMethod, defaults, restOptions) {
+      var _this = this;
 
-      if (defaults !== undefined) this.endpoints[name].defaults = defaults;
+      var newClient = new _aureliaFetchClient.HttpClient();
+      var useTraditionalUriTemplates = void 0;
+
+      if (restOptions !== undefined) {
+        useTraditionalUriTemplates = restOptions.useTraditionalUriTemplates;
+      }
+      this.endpoints[name] = new Rest(newClient, name, useTraditionalUriTemplates);
+
+      if (defaults !== undefined) {
+        this.endpoints[name].defaults = defaults;
+      }
 
       if (typeof configureMethod === 'function') {
         newClient.configure(configureMethod);
@@ -141,7 +155,15 @@ define(['exports', 'qs', 'extend', 'aurelia-fetch-client', 'aurelia-dependency-i
         return this;
       }
 
-      if (typeof configureMethod !== 'string') {
+      if (typeof configureMethod !== 'string' && !this.defaultBaseUrl) {
+        return this;
+      }
+
+      if (this.defaultBaseUrl && typeof configureMethod !== 'string' && typeof configureMethod !== 'function') {
+        newClient.configure(function (configure) {
+          configure.withBaseUrl(_this.defaultBaseUrl);
+        });
+
         return this;
       }
 
@@ -170,6 +192,12 @@ define(['exports', 'qs', 'extend', 'aurelia-fetch-client', 'aurelia-dependency-i
       return this;
     };
 
+    Config.prototype.setDefaultBaseUrl = function setDefaultBaseUrl(baseUrl) {
+      this.defaultBaseUrl = baseUrl;
+
+      return this;
+    };
+
     Config.prototype.registerInterceptor = function registerInterceptor(name, interceptor) {
       var endpoint = this.getEndpoint(name);
 
@@ -180,12 +208,46 @@ define(['exports', 'qs', 'extend', 'aurelia-fetch-client', 'aurelia-dependency-i
       return this;
     };
 
+    Config.prototype.configure = function configure(config) {
+      var _this2 = this;
+
+      if (config.defaultBaseUrl) {
+        this.defaultBaseUrl = config.defaultBaseUrl;
+      }
+
+      config.endpoints.forEach(function (endpoint) {
+        _this2.registerEndpoint(endpoint.name, endpoint.endpoint, endpoint.config);
+
+        if (endpoint.default) {
+          _this2.setDefaultEndpoint(endpoint.name);
+        }
+      });
+
+      if (config.defaultEndpoint) {
+        this.setDefaultEndpoint(config.defaultEndpoint);
+      }
+
+      return this;
+    };
+
     return Config;
   }();
 
+  function configure(frameworkConfig, configOrConfigure) {
+    var config = frameworkConfig.container.get(Config);
+
+    if (typeof configOrConfigure === 'function') {
+      configOrConfigure(config);
+
+      return;
+    }
+
+    config.configure(configOrConfigure);
+  }
+
   var Endpoint = exports.Endpoint = (_dec = (0, _aureliaDependencyInjection.resolver)(), _dec(_class3 = function () {
     function Endpoint(key) {
-      _classCallCheck(this, Endpoint);
+      
 
       this._key = key;
     }
@@ -200,16 +262,4 @@ define(['exports', 'qs', 'extend', 'aurelia-fetch-client', 'aurelia-dependency-i
 
     return Endpoint;
   }()) || _class3);
-
-
-  function configure(aurelia, configCallback) {
-    var config = aurelia.container.get(Config);
-
-    configCallback(config);
-  }
-
-  exports.configure = configure;
-  exports.Config = Config;
-  exports.Rest = Rest;
-  exports.Endpoint = Endpoint;
 });

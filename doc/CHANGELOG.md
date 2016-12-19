@@ -1,3 +1,77 @@
+<a name="3.0.0"></a>
+# [3.0.0](https://github.com/SpoonX/aurelia-api/compare/3.0.0-rc9...v3.0.0) (2016-10-05)
+
+
+### Bug Fixes
+
+* **rest:** enable content- type charset ([f5f4aec](https://github.com/SpoonX/aurelia-api/commit/f5f4aec))
+
+
+### Features
+
+* **configure:** allow configuration with an object ([6266e3e](https://github.com/SpoonX/aurelia-api/commit/6266e3e))
+
+
+
+<a name="3.0.0-rc9"></a>
+# [3.0.0-rc9](https://github.com/SpoonX/aurelia-api/compare/3.0.0-rc8...v3.0.0-rc9) (2016-09-06)
+
+
+### Bug Fixes
+
+* **rest:** convert number to string before joining path ([34e8ba1](https://github.com/SpoonX/aurelia-api/commit/34e8ba1))
+* **rest:** don't set body when body===null ([6b061b1](https://github.com/SpoonX/aurelia-api/commit/6b061b1))
+
+
+### Features
+
+* **project:** proper types ([320b798](https://github.com/SpoonX/aurelia-api/commit/320b798))
+* **rest:** add findOne, updateOne,..  methods to allow for path/id?filter=some ([b6beffb](https://github.com/SpoonX/aurelia-api/commit/b6beffb))
+
+
+
+<a name="3.0.0-rc8"></a>
+## [3.0.0-rc8](https://github.com/SpoonX/aurelia-api/compare/3.0.0-rc7...v3.0.0-rc8) (2016-08-03)
+
+
+### Bug Fixes
+
+* **rest:** don't replace //, avoid adding them instead ([2ce671a](https://github.com/SpoonX/aurelia-api/commit/2ce671a))
+
+
+
+<a name="3.0.0-rc7"></a>
+## [3.0.0-rc7](https://github.com/SpoonX/aurelia-api/compare/3.0.0-rc6...v3.0.0-rc7) (2016-08-03)
+
+
+### Bug Fixes
+
+* **rest:** maintain trailing slash to resource parameter ([4ec39a3](https://github.com/SpoonX/aurelia-api/commit/4ec39a3))
+
+
+
+<a name="3.0.0-rc6"></a>
+## [3.0.0-rc6](https://github.com/SpoonX/aurelia-api/compare/3.0.0-rc5...v3.0.0-rc6) (2016-07-22)
+
+
+### Bug Fixes
+
+* **build:** don't concat index.d.ts and exclude 'extends' in d.ts ([5306cfb](https://github.com/SpoonX/aurelia-api/commit/5306cfb))
+
+### Features
+
+* **project:** add gulp fixup-dts. removes unneeded/problematic external imports from d.ts ([5d1ce61](https://github.com/SpoonX/aurelia-api/commit/5d1ce61))
+
+
+<a name="3.0.0-rc5"></a>
+## [3.0.0-rc5](https://github.com/SpoonX/aurelia-api/compare/3.0.0-rc4...v3.0.0-rc5) (2016-07-01)
+
+
+### Features
+
+* **typings:** add typings.json to allow `typings i github:spoonx/aurelia-api` ([d0dd212](https://github.com/SpoonX/aurelia-api/commit/d0dd212))
+
+
 <a name"3.0.0-rc4"></a>
 ### 3.0.0-rc4 (2016-06-09)
 

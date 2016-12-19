@@ -2,37 +2,69 @@ import {HttpClient} from 'aurelia-fetch-client';
 import {Rest} from './rest';
 
 /**
+ * Represents the options to use when constructing a `Rest` instance.
+ */
+interface RestOptions {
+  /**
+   * `true` to use the traditional URI template standard (RFC6570) when building
+   * query strings from criteria objects, `false` otherwise. Default is `false`.
+   * NOTE: maps to `useTraditionalUriTemplates` parameter on `Rest` constructor.
+   *
+   * @type {boolean}
+   */
+  useTraditionalUriTemplates?: boolean;
+}
+
+/**
  * Config class. Configures and stores endpoints
  */
 export class Config {
   /**
-   * Collection of configures endpionts
-   * @param {Object} Key: endpoint name, value: Rest client
+   * Collection of configures endpoints
+   *
+   * @param {{}} Key: endpoint name; value: Rest client
    */
-  endpoints       = {};
+  endpoints: {[key: string]: Rest} = {};
 
   /**
    * Current default endpoint if set
-   * @param {[Rest]} Default Rest client
+   *
+   * @param {Rest} defaultEndpoint The Rest client
    */
-  defaultEndpoint = null;
+  defaultEndpoint: Rest;
+
+   /**
+    * Current default baseUrl if set
+    *
+    * @param {string} defaultBaseUrl The Rest client
+    */
+  defaultBaseUrl: string;
 
   /**
    * Register a new endpoint.
    *
    * @param {string}          name              The name of the new endpoint.
-   * @param {function|string} [configureMethod] Configure method or endpoint.
+   * @param {Function|string} [configureMethod] Endpoint url or configure method for client.configure().
    * @param {{}}              [defaults]        New defaults for the HttpClient
+   * @param {RestOptions}     [restOptions]     Options to pass when constructing the Rest instance.
    *
    * @see http://aurelia.io/docs.html#/aurelia/fetch-client/latest/doc/api/class/HttpClientConfiguration
-   * @return {Config}
+   * @return {Config} this Fluent interface
+   * @chainable
    */
-  registerEndpoint(name, configureMethod, defaults) {
-    let newClient        = new HttpClient();
-    this.endpoints[name] = new Rest(newClient, name);
+  registerEndpoint(name: string, configureMethod?: string|Function, defaults?: {}, restOptions?: RestOptions): Config {
+    let newClient = new HttpClient();
+    let useTraditionalUriTemplates;
+
+    if (restOptions !== undefined) {
+      useTraditionalUriTemplates = restOptions.useTraditionalUriTemplates;
+    }
+    this.endpoints[name] = new Rest(newClient, name, useTraditionalUriTemplates);
 
     // set custom defaults to Rest
-    if (defaults !== undefined) this.endpoints[name].defaults = defaults;
+    if (defaults !== undefined) {
+      this.endpoints[name].defaults = defaults;
+    }
 
     // Manual configure of client.
     if (typeof configureMethod === 'function') {
@@ -41,8 +73,16 @@ export class Config {
       return this;
     }
 
-    // Base url is self.
-    if (typeof configureMethod !== 'string') {
+    // Base url is self / current host.
+    if (typeof configureMethod !== 'string' && !this.defaultBaseUrl) {
+      return this;
+    }
+
+    if (this.defaultBaseUrl && typeof configureMethod !== 'string' && typeof configureMethod !== 'function') {
+      newClient.configure(configure => {
+        configure.withBaseUrl(this.defaultBaseUrl);
+      });
+
       return this;
     }
 
@@ -57,11 +97,11 @@ export class Config {
   /**
    * Get a previously registered endpoint. Returns null when not found.
    *
-   * @param {string} [name] Endpoint bame. Returns default endpoint when not set.
+   * @param {string} [name] The endpoint name. Returns default endpoint when not set.
    *
    * @return {Rest|null}
    */
-  getEndpoint(name) {
+  getEndpoint(name: string): Rest {
     if (!name) {
       return this.defaultEndpoint || null;
     }
@@ -76,7 +116,7 @@ export class Config {
    *
    * @return {boolean}
    */
-  endpointExists(name) {
+  endpointExists(name: string): boolean {
     return !!this.endpoints[name];
   }
 
@@ -85,27 +125,70 @@ export class Config {
    *
    * @param {string} name The endpoint name
    *
-   * @return {Config}
+   * @return {Config} this Fluent interface
+   * @chainable
    */
-  setDefaultEndpoint(name) {
+  setDefaultEndpoint(name: string): Config {
     this.defaultEndpoint = this.getEndpoint(name);
 
     return this;
   }
 
   /**
-   * Register interceptor for previously registered endpoint.
+   * Set a base url for all endpoints
    *
-   * @param {string} name
-   * @param {object} interceptor
+   * @param {string} baseUrl The url for endpoints to append
    *
-   * @return {Config}
+   * @return {Config} this Fluent interface
+   * @chainable
    */
+  setDefaultBaseUrl(baseUrl: string): Config {
+    this.defaultBaseUrl = baseUrl;
+
+    return this;
+  }
+
+  /**
+  * Register interceptor for previously registered endpoint.
+  *
+  * @param {string} name
+  * @param {object} interceptor
+  *
+  * @return {Config}
+  */
   registerInterceptor(name, interceptor) {
     let endpoint = this.getEndpoint(name);
 
     if (endpoint) {
       endpoint.interceptor = interceptor;
+    }
+
+    return this;
+  }
+
+  /**
+   * Configure with an object
+   *
+   * @param {{}} config The configuration object
+   *
+   * @return {Config} this Fluent interface
+   * @chainable
+   */
+  configure(config: {defaultEndpoint: string, defaultBaseUrl: string, endpoints: Array<{name: string, endpoint: string, config: {}, default: boolean}>}): Config {
+    if (config.defaultBaseUrl) {
+      this.defaultBaseUrl = config.defaultBaseUrl;
+    }
+
+    config.endpoints.forEach(endpoint => {
+      this.registerEndpoint(endpoint.name, endpoint.endpoint, endpoint.config);
+
+      if (endpoint.default) {
+        this.setDefaultEndpoint(endpoint.name);
+      }
+    });
+
+    if (config.defaultEndpoint) {
+      this.setDefaultEndpoint(config.defaultEndpoint);
     }
 
     return this;

@@ -15,6 +15,7 @@ defaults = {
 
 Ways to register your endpoints in `main.js`:
 
+## Configuration with a function
 ```js
 aurelia.use
   /* Your other plugins and init code */
@@ -45,6 +46,33 @@ aurelia.use
       .registerEndpoint('auth', 'https://auth.myapi.org/')
       .setDefaultEndpoint('auth');
   });
+  
+  // 8: Set Default BaseUrl
+    config.setDefaultBaseUrl('https://myapi.org/');
+```
+
+
+## Configuration with an object
+
+```js
+aurelia.use
+  /* Your other plugins and init code */
+  .plugin('aurelia-api', {
+    endpoints: [
+      // 1: Current host
+      {name: 'api'},
+      // 2: Specific host
+      {name: 'api', endpoint: 'https://myapi.org/'},
+      // 3: With different endpoint defaults
+      {name: 'weather', endpoint: 'https://weatherapi.io/', config: {headers: {x: 'foo'}}},
+      // 4: Without endpoint defaults
+      {name: 'weather', endpoint: 'https://weatherapi.io/', config: null};
+    ],
+    // 6: Set default endppoint. alternatively, add default: true above
+    defaultEndpoint: 'api',
+    // 8: Set Default BaseUrl
+    defaultBaseUrl: 'https://myapi.org/'
+  })
 ```
 
 Here's a more detailed explanation for every method of registering used:
@@ -78,3 +106,7 @@ This method allows you to set the default endpoint to use. This means, that when
 ## 7: Chain
 
 All methods return `this`, allowing you to chain the calls.
+
+## 8: Set default base URL
+
+All endpoints registered after this call will use this default base URL, rather than the current host URL. 

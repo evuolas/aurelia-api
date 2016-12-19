@@ -1,16 +1,24 @@
+import {Container} from 'aurelia-dependency-injection';
 import {Config} from './config';
-import {Rest} from './rest';
-import {Endpoint} from './endpoint';
 
-function configure(aurelia, configCallback) {
-  let config = aurelia.container.get(Config);
+/**
+ * Plugin configure
+ *
+ * @export
+ * @param {{ container: Container}} frameworkConfig
+ * @param {({defaultEndpoint: string, defaultBaseUrl: string, endpoints: Array<{name: string, endpoint: string, config: RequestInit, default: boolean}>} | function(config: Config): void)} configOrConfigure
+ */
+export function configure(
+  frameworkConfig: {container: Container},
+  configOrConfigure: {defaultEndpoint: string, defaultBaseUrl: string, endpoints: Array<{name: string, endpoint: string, config: RequestInit, default: boolean}>} | ((config: Config) => void)
+) {
+  let config = frameworkConfig.container.get(Config);
 
-  configCallback(config);
+  if (typeof configOrConfigure === 'function') {
+    configOrConfigure(config);
+
+    return;
+  }
+
+  config.configure(configOrConfigure);
 }
-
-export {
-  configure,
-  Config,
-  Rest,
-  Endpoint
-};

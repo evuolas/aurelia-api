@@ -1,5 +1,6 @@
 import {HttpClient} from 'aurelia-fetch-client';
-import {Config, Rest} from '../src/aurelia-api';
+import {Config} from '../src/config';
+import {Rest} from '../src/rest';
 
 describe('Config', function() {
   describe('.registerEndpoint()', function() {
@@ -91,6 +92,39 @@ describe('Config', function() {
       expect(config.getEndpoint() instanceof Rest).toBe(true);
     });
   });
+
+  describe('.setDefaultBaseUrl()', function() {
+    it('Should set the default baseUrl.', function() {
+      let config = new Config;
+
+      config.registerEndpoint('api', baseUrls.github);
+      expect(config.endpoints.api.client.baseUrl).toEqual(baseUrls.github);
+      config.setDefaultBaseUrl(baseUrls.api);
+      config.registerEndpoint('api');
+      expect(config.endpoints.api.client.baseUrl).toEqual(baseUrls.api);
+    });
+  });
+
+  describe('.configure()', function() {
+    it('Should properly configure with an object.', function() {
+      let config   = new Config;
+      let returned = config.configure(configObject);
+
+      expect(returned).toBe(config);
+
+      expect(config.endpoints.github.defaults).toEqual(defaultOptions);
+      expect(config.endpoints.github.client.baseUrl).toEqual(baseUrls.github);
+
+      expect(config.endpoints.boring.defaults).toEqual(defaultOptions);
+      expect(config.endpoints.boring.client.baseUrl).toEqual('');
+
+      expect(config.endpoints.api.defaults).toEqual(userOptions);
+      expect(config.endpoints.api.client.baseUrl).toEqual(baseUrls.api);
+
+      expect(config.defaultEndpoint.defaults).toEqual(defaultOptions);
+      expect(config.defaultEndpoint.client.baseUrl).toEqual(baseUrls.github);
+    });
+  });
 });
 
 let baseUrls = {
@@ -108,3 +142,11 @@ let userOptions = {
   'headers': {
     'x-scope': 'Tests'
   }};
+
+let configObject = {
+  endpoints: [
+    {name: 'boring'},
+    {name: 'github', endpoint: baseUrls.github, default: true},
+    {name: 'api',    endpoint: baseUrls.api, config: userOptions}
+  ]
+};
