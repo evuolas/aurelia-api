@@ -44,6 +44,11 @@ define(['exports', 'extend', 'aurelia-path', 'aurelia-fetch-client', 'aurelia-de
     Rest.prototype.request = function request(method, path, body, options) {
       var requestOptions = (0, _extend2.default)(true, { headers: {} }, this.defaults, options || {}, { method: method, body: body });
       var contentType = requestOptions.headers['Content-Type'] || requestOptions.headers['content-type'];
+      var interceptor = this.interceptor;
+
+      if (interceptor && typeof interceptor.request === 'function') {
+        requestOptions = interceptor.request(requestOptions);
+      }
 
       if ((typeof body === 'undefined' ? 'undefined' : _typeof(body)) === 'object' && body !== null && contentType) {
         requestOptions.body = /^application\/json/.test(contentType.toLowerCase()) ? JSON.stringify(body) : (0, _aureliaPath.buildQueryString)(body);

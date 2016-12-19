@@ -74,6 +74,11 @@ export class Rest {
   request(method: string, path: string, body?: {}, options?: {}): Promise<any|Error> {
     let requestOptions = extend(true, {headers: {}}, this.defaults, options || {}, {method, body});
     let contentType    = requestOptions.headers['Content-Type'] || requestOptions.headers['content-type'];
+    let interceptor    = this.interceptor;
+
+    if (interceptor && typeof interceptor.request === 'function') {
+      requestOptions = interceptor.request(requestOptions);
+    }
 
     if (typeof body === 'object' && body !== null && contentType) {
       requestOptions.body = (/^application\/json/).test(contentType.toLowerCase())
