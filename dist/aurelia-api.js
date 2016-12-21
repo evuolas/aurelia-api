@@ -3,7 +3,6 @@ import {buildQueryString,join} from 'aurelia-path';
 import {HttpClient} from 'aurelia-fetch-client';
 import {Container,resolver} from 'aurelia-dependency-injection';
 
-
 /**
  * Rest class. A simple rest client to fetch resources
  */

@@ -1,6 +1,8 @@
 'use strict';
 
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.Endpoint = exports.Config = exports.Rest = undefined;
 
 var _dec, _class3;
@@ -21,11 +23,11 @@ var _aureliaDependencyInjection = require('aurelia-dependency-injection');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Rest = exports.Rest = function () {
   function Rest(httpClient, endpoint, useTraditionalUriTemplates) {
-    
+    _classCallCheck(this, Rest);
 
     this.defaults = {
       headers: {
@@ -137,7 +139,7 @@ function getRequestPath(resource, traditional, idOrCriteria, criteria) {
 
 var Config = exports.Config = function () {
   function Config() {
-    
+    _classCallCheck(this, Config);
 
     this.endpoints = {};
   }
@@ -255,7 +257,7 @@ function configure(frameworkConfig, configOrConfigure) {
 
 var Endpoint = exports.Endpoint = (_dec = (0, _aureliaDependencyInjection.resolver)(), _dec(_class3 = function () {
   function Endpoint(key) {
-    
+    _classCallCheck(this, Endpoint);
 
     this._key = key;
   }
