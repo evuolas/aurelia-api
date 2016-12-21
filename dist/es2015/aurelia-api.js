@@ -29,7 +29,7 @@ export let Rest = class Rest {
     }
 
     if (typeof body === 'object' && body !== null && contentType) {
-      requestOptions.body = /^application\/json/.test(contentType.toLowerCase()) ? JSON.stringify(body) : buildQueryString(body);
+      requestOptions.body = /^application\/json/.test(contentType.toLowerCase()) ? JSON.stringify(requestOptions.body) : buildQueryString(requestOptions.body);
     }
 
     return this.client.fetch(path, requestOptions).then(response => {
@@ -98,6 +98,11 @@ function getRequestPath(resource, traditional, idOrCriteria, criteria) {
   }
 
   if (typeof criteria === 'object' && criteria !== null) {
+    if (criteria.id) {
+      resource += `${ hasSlash ? '' : '/' }${ criteria.id }`;
+      delete criteria.id;
+    }
+
     resource += `?${ buildQueryString(criteria, traditional) }`;
   } else if (criteria) {
     resource += `${ hasSlash ? '' : '/' }${ criteria }${ hasSlash ? '/' : '' }`;

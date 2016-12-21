@@ -1,8 +1,6 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+exports.__esModule = true;
 exports.Endpoint = exports.Config = exports.Rest = undefined;
 
 var _dec, _class3;
@@ -51,7 +49,7 @@ var Rest = exports.Rest = function () {
     }
 
     if ((typeof body === 'undefined' ? 'undefined' : _typeof(body)) === 'object' && body !== null && contentType) {
-      requestOptions.body = /^application\/json/.test(contentType.toLowerCase()) ? JSON.stringify(body) : (0, _aureliaPath.buildQueryString)(body);
+      requestOptions.body = /^application\/json/.test(contentType.toLowerCase()) ? JSON.stringify(requestOptions.body) : (0, _aureliaPath.buildQueryString)(requestOptions.body);
     }
 
     return this.client.fetch(path, requestOptions).then(function (response) {
@@ -124,6 +122,11 @@ function getRequestPath(resource, traditional, idOrCriteria, criteria) {
   }
 
   if ((typeof criteria === 'undefined' ? 'undefined' : _typeof(criteria)) === 'object' && criteria !== null) {
+    if (criteria.id) {
+      resource += '' + (hasSlash ? '' : '/') + criteria.id;
+      delete criteria.id;
+    }
+
     resource += '?' + (0, _aureliaPath.buildQueryString)(criteria, traditional);
   } else if (criteria) {
     resource += '' + (hasSlash ? '' : '/') + criteria + (hasSlash ? '/' : '');
